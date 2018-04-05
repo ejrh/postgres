@@ -116,6 +116,25 @@ FETCH FIRST FROM c;
 (1 row)
 
 ROLLBACK;
+-- make sure that tid scan is chosen rather than tid range scan, if there are equality/in quals as well as range quals
+EXPLAIN (COSTS OFF)
+SELECT ctid, * FROM tidscan WHERE ctid = '(0,1)' AND ctid < '(3,0)';
+            QUERY PLAN             
+-----------------------------------
+ Tid Scan on tidscan
+   TID Cond: (ctid = '(0,1)'::tid)
+   Filter: (ctid < '(3,0)'::tid)
+(3 rows)
+
+EXPLAIN (COSTS OFF)
+SELECT ctid, * FROM tidscan WHERE ctid = ANY(ARRAY['(0,1)', '(0,2)']::tid[]) AND ctid < '(3,0)';
+                      QUERY PLAN                       
+-------------------------------------------------------
+ Tid Scan on tidscan
+   TID Cond: (ctid = ANY ('{"(0,1)","(0,2)"}'::tid[]))
+   Filter: (ctid < '(3,0)'::tid)
+(3 rows)
+
 -- check that ordering on a tidscan doesn't require a sort
 EXPLAIN (COSTS OFF)
 SELECT ctid, * FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid;

@@ -227,4 +227,7 @@ extern Selectivity scalararraysel_containment(PlannerInfo *root,
 						   Oid elemtype, bool isEquality, bool useOr,
 						   int varRelid);
 
+
+extern double tid_range_selectivity(RelOptInfo *rel, Expr *lower_qual, Expr *upper_qual);
+
 #endif							/* SELFUNCS_H */

@@ -1229,10 +1229,21 @@ typedef struct BitmapOrPath
  * "CTID = pseudoconstant" or "CTID = ANY(pseudoconstant_array)".
  * Note they are bare expressions, not RestrictInfos.
  */
+typedef enum
+{
+	TID_PATH_LIST,			/* tidquals is a list of CTID = ?, CTID IN (?), with OR-semantics */
+	TID_PATH_RANGE			/* tidquals is a list of CTID > ?, CTID < ?, with AND-semantics */
+} TidPathMethod;
+
 typedef struct TidPath
 {
-	Path		path;
-	List	   *tidquals;		/* qual(s) involving CTID = something */
+	Path		  path;
+	List		 *tidquals;
+	TidPathMethod method;
+	Expr		 *lower_bound;
+	Expr		 *upper_bound;
+	bool		  lower_strict;
+	bool		  upper_strict;
 	ScanDirection direction;
 } TidPath;
 

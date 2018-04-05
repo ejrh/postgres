@@ -619,6 +619,21 @@ _outTidScan(StringInfo str, const TidScan *node)
 }
 
 static void
+_outTidRangeScan(StringInfo str, const TidRangeScan *node)
+{
+	WRITE_NODE_TYPE("TIDRANGESCAN");
+
+	_outScanInfo(str, (const Scan *) node);
+
+	WRITE_NODE_FIELD(tidquals);
+	WRITE_NODE_FIELD(lower_bound);
+	WRITE_NODE_FIELD(upper_bound);
+	WRITE_BOOL_FIELD(lower_strict);
+	WRITE_BOOL_FIELD(upper_strict);
+	WRITE_ENUM_FIELD(direction, ScanDirection);
+}
+
+static void
 _outSubqueryScan(StringInfo str, const SubqueryScan *node)
 {
 	WRITE_NODE_TYPE("SUBQUERYSCAN");
@@ -1892,6 +1907,12 @@ _outTidPath(StringInfo str, const TidPath *node)
 	_outPathInfo(str, (const Path *) node);
 
 	WRITE_NODE_FIELD(tidquals);
+	WRITE_ENUM_FIELD(method, TidPathMethod);
+	WRITE_NODE_FIELD(lower_bound);
+	WRITE_NODE_FIELD(upper_bound);
+	WRITE_BOOL_FIELD(lower_strict);
+	WRITE_BOOL_FIELD(upper_strict);
+	WRITE_ENUM_FIELD(direction, ScanDirection);
 }
 
 static void
@@ -3762,6 +3783,9 @@ outNode(StringInfo str, const void *obj)
 				break;
 			case T_TidScan:
 				_outTidScan(str, obj);
+				break;
+			case T_TidRangeScan:
+				_outTidRangeScan(str, obj);
 				break;
 			case T_SubqueryScan:
 				_outSubqueryScan(str, obj);

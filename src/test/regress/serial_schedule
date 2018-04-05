@@ -134,6 +134,7 @@ test: misc_functions
 test: sysviews
 test: tsrf
 test: tidscan
+test: tidrangescan
 test: stats_ext
 test: rules
 test: psql_crosstab

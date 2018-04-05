@@ -43,6 +43,12 @@ FETCH BACKWARD 1 FROM c;
 FETCH FIRST FROM c;
 ROLLBACK;
 
+-- make sure that tid scan is chosen rather than tid range scan, if there are equality/in quals as well as range quals
+EXPLAIN (COSTS OFF)
+SELECT ctid, * FROM tidscan WHERE ctid = '(0,1)' AND ctid < '(3,0)';
+EXPLAIN (COSTS OFF)
+SELECT ctid, * FROM tidscan WHERE ctid = ANY(ARRAY['(0,1)', '(0,2)']::tid[]) AND ctid < '(3,0)';
+
 -- check that ordering on a tidscan doesn't require a sort
 EXPLAIN (COSTS OFF)
 SELECT ctid, * FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid;

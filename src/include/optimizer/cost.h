@@ -90,7 +90,8 @@ extern void cost_bitmap_and_node(BitmapAndPath *path, PlannerInfo *root);
 extern void cost_bitmap_or_node(BitmapOrPath *path, PlannerInfo *root);
 extern void cost_bitmap_tree_node(Path *path, Cost *cost, Selectivity *selec);
 extern void cost_tidscan(Path *path, PlannerInfo *root,
-			 RelOptInfo *baserel, List *tidquals, ParamPathInfo *param_info);
+			 RelOptInfo *baserel, List *tidquals, TidPathMethod method, Expr *lower_bound, Expr *upper_bound,
+			 ParamPathInfo *param_info);
 extern void cost_subqueryscan(SubqueryScanPath *path, PlannerInfo *root,
 				  RelOptInfo *baserel, ParamPathInfo *param_info);
 extern void cost_functionscan(Path *path, PlannerInfo *root,

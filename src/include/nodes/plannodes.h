@@ -496,6 +496,21 @@ typedef struct TidScan
 } TidScan;
 
 /* ----------------
+ *		tid range scan node
+ * ----------------
+ */
+typedef struct TidRangeScan
+{
+	Scan		scan;
+	List	   *tidquals;
+	Expr		*lower_bound;
+	Expr		*upper_bound;
+	bool		lower_strict;
+	bool		upper_strict;
+	ScanDirection direction;
+} TidRangeScan;
+
+/* ----------------
  *		subquery scan node
  *
  * SubqueryScan is for scanning the output of a sub-query in the range table.

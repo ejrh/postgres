@@ -76,6 +76,7 @@
 #include "access/amapi.h"
 #include "access/htup_details.h"
 #include "access/tsmapi.h"
+#include "catalog/pg_operator.h"
 #include "executor/executor.h"
 #include "executor/nodeHash.h"
 #include "miscadmin.h"
@@ -93,6 +94,7 @@
 #include "utils/selfuncs.h"
 #include "utils/spccache.h"
 #include "utils/tuplesort.h"
+#include "nodes/print.h"
 
 
 #define LOG2(x)  (log(x) / 0.693147180559945)
@@ -1166,6 +1168,54 @@ cost_bitmap_or_node(BitmapOrPath *path, PlannerInfo *root)
 	path->path.total_cost = totalCost;
 }
 
+static void
+estimate_tidscan_tuples_and_pages(RelOptInfo *baserel, List *tidquals, TidPathMethod method, Expr *lower_bound, Expr *upper_bound,
+								  int *ntuples_out, int *npages_out, int *nrandom_pages_out, bool *isCurrentOf) {
+	ListCell   *l;
+	int ntuples = 0;
+	int npages = 0;
+	int nrandom_pages = 0;
+
+	if (method == TID_PATH_LIST)
+	{
+		foreach(l, tidquals)
+		{
+			if (IsA(lfirst(l), ScalarArrayOpExpr))
+			{
+				/* Each element of the array yields 1 tuple */
+				ScalarArrayOpExpr *saop = (ScalarArrayOpExpr *) lfirst(l);
+				Node	   *arraynode = (Node *) lsecond(saop->args);
+
+				ntuples += estimate_array_length(arraynode);
+				nrandom_pages++;
+			}
+			else if (IsA(lfirst(l), CurrentOfExpr))
+			{
+				/* CURRENT OF yields 1 tuple */
+				*isCurrentOf = true;
+				ntuples++;
+				nrandom_pages++;
+			}
+			else
+			{
+				/* It's just CTID = something, count 1 tuple */
+				ntuples++;
+				nrandom_pages++;
+			}
+		}
+	}
+	else
+	{
+		double selectivity = tid_range_selectivity(baserel, lower_bound, upper_bound);
+		ntuples += selectivity * baserel->tuples;
+		npages += selectivity * baserel->pages;
+	}
+
+	*ntuples_out = ntuples;
+	*npages_out = npages;
+	*nrandom_pages_out = nrandom_pages;
+}
+
 /*
  * cost_tidscan
  *	  Determines and returns the cost of scanning a relation using TIDs.
@@ -1176,7 +1226,8 @@ cost_bitmap_or_node(BitmapOrPath *path, PlannerInfo *root)
  */
 void
 cost_tidscan(Path *path, PlannerInfo *root,
-			 RelOptInfo *baserel, List *tidquals, ParamPathInfo *param_info)
+			 RelOptInfo *baserel, List *tidquals, TidPathMethod method, Expr *lower_bound, Expr *upper_bound,
+			 ParamPathInfo *param_info)
 {
 	Cost		startup_cost = 0;
 	Cost		run_cost = 0;
@@ -1185,8 +1236,10 @@ cost_tidscan(Path *path, PlannerInfo *root,
 	Cost		cpu_per_tuple;
 	QualCost	tid_qual_cost;
 	int			ntuples;
-	ListCell   *l;
+	int			npages;
+	int			nrandom_pages;
 	double		spc_random_page_cost;
+	double		spc_seq_page_cost;
 
 	/* Should only be applied to base relations */
 	Assert(baserel->relid > 0);
@@ -1199,29 +1252,8 @@ cost_tidscan(Path *path, PlannerInfo *root,
 		path->rows = baserel->rows;
 
 	/* Count how many tuples we expect to retrieve */
-	ntuples = 0;
-	foreach(l, tidquals)
-	{
-		if (IsA(lfirst(l), ScalarArrayOpExpr))
-		{
-			/* Each element of the array yields 1 tuple */
-			ScalarArrayOpExpr *saop = (ScalarArrayOpExpr *) lfirst(l);
-			Node	   *arraynode = (Node *) lsecond(saop->args);
-
-			ntuples += estimate_array_length(arraynode);
-		}
-		else if (IsA(lfirst(l), CurrentOfExpr))
-		{
-			/* CURRENT OF yields 1 tuple */
-			isCurrentOf = true;
-			ntuples++;
-		}
-		else
-		{
-			/* It's just CTID = something, count 1 tuple */
-			ntuples++;
-		}
-	}
+	estimate_tidscan_tuples_and_pages(baserel, tidquals, method, lower_bound, upper_bound,
+									  &ntuples, &npages, &nrandom_pages, &isCurrentOf);
 
 	/*
 	 * We must force TID scan for WHERE CURRENT OF, because only nodeTidscan.c
@@ -1248,10 +1280,11 @@ cost_tidscan(Path *path, PlannerInfo *root,
 	/* fetch estimated page cost for tablespace containing table */
 	get_tablespace_page_costs(baserel->reltablespace,
 							  &spc_random_page_cost,
-							  NULL);
+							  &spc_seq_page_cost);
 
-	/* disk costs --- assume each tuple on a different page */
-	run_cost += spc_random_page_cost * ntuples;
+	/* disk costs */
+	run_cost += spc_random_page_cost * nrandom_pages;
+	run_cost += spc_seq_page_cost * npages;
 
 	/* Add scanning CPU costs */
 	get_restriction_qual_cost(root, baserel, param_info, &qpqual_cost);
