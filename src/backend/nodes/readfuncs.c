@@ -1828,6 +1828,7 @@ _readTidScan(void)
 	ReadCommonScan(&local_node->scan);
 
 	READ_NODE_FIELD(tidquals);
+	READ_ENUM_FIELD(direction, ScanDirection);
 
 	READ_DONE();
 }

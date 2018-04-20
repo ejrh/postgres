@@ -116,6 +116,39 @@ FETCH FIRST FROM c;
 (1 row)
 
 ROLLBACK;
+-- check that ordering on a tidscan doesn't require a sort
+EXPLAIN (COSTS OFF)
+SELECT ctid, * FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid;
+                          QUERY PLAN                           
+---------------------------------------------------------------
+ Tid Scan on tidscan
+   TID Cond: (ctid = ANY ('{"(0,2)","(0,1)","(0,3)"}'::tid[]))
+(2 rows)
+
+SELECT ctid, * FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid;
+ ctid  | id 
+-------+----
+ (0,1) |  1
+ (0,2) |  2
+ (0,3) |  3
+(3 rows)
+
+EXPLAIN (COSTS OFF)
+SELECT ctid, * FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid DESC;
+                          QUERY PLAN                           
+---------------------------------------------------------------
+ Tid Scan Backward on tidscan
+   TID Cond: (ctid = ANY ('{"(0,2)","(0,1)","(0,3)"}'::tid[]))
+(2 rows)
+
+SELECT ctid, * FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid DESC;
+ ctid  | id 
+-------+----
+ (0,3) |  3
+ (0,2) |  2
+ (0,1) |  1
+(3 rows)
+
 -- tidscan via CURRENT OF
 BEGIN;
 DECLARE c CURSOR FOR SELECT ctid, * FROM tidscan;

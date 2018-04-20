@@ -615,6 +615,7 @@ _outTidScan(StringInfo str, const TidScan *node)
 	_outScanInfo(str, (const Scan *) node);
 
 	WRITE_NODE_FIELD(tidquals);
+	WRITE_ENUM_FIELD(direction, ScanDirection);
 }
 
 static void

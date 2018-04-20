@@ -156,7 +156,7 @@
   oprname => '<', oprleft => 'tid', oprright => 'tid', oprresult => 'bool',
   oprcom => '>(tid,tid)', oprnegate => '>=(tid,tid)', oprcode => 'tidlt',
   oprrest => 'scalarltsel', oprjoin => 'scalarltjoinsel' },
-{ oid => '2800', descr => 'greater than',
+{ oid => '2800', oid_symbol => 'TIDGreaterOperator', descr => 'greater than',
   oprname => '>', oprleft => 'tid', oprright => 'tid', oprresult => 'bool',
   oprcom => '<(tid,tid)', oprnegate => '<=(tid,tid)', oprcode => 'tidgt',
   oprrest => 'scalargtsel', oprjoin => 'scalargtjoinsel' },
