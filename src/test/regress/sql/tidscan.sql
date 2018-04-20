@@ -43,6 +43,15 @@ FETCH BACKWARD 1 FROM c;
 FETCH FIRST FROM c;
 ROLLBACK;
 
+-- check that ordering on a tidscan doesn't require a sort
+EXPLAIN (COSTS OFF)
+SELECT ctid, * FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid;
+SELECT ctid, * FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid;
+
+EXPLAIN (COSTS OFF)
+SELECT ctid, * FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid DESC;
+SELECT ctid, * FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid DESC;
+
 -- tidscan via CURRENT OF
 BEGIN;
 DECLARE c CURSOR FOR SELECT ctid, * FROM tidscan;

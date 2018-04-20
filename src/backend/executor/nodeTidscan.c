@@ -50,6 +50,7 @@ typedef struct TidExpr
 static void TidExprListCreate(TidScanState *tidstate);
 static void TidListEval(TidScanState *tidstate);
 static int	itemptr_comparator(const void *a, const void *b);
+static int	itemptr_comparator_reverse(const void *a, const void *b);
 static TupleTableSlot *TidNext(TidScanState *node);
 
 
@@ -247,12 +248,16 @@ TidListEval(TidScanState *tidstate)
 	{
 		int			lastTid;
 		int			i;
+		int (* cmp) (const void *, const void *);
+
+		/* Choose the sort order based on the scan direction. */
+		cmp = ScanDirectionIsBackward(((TidScan *) tidstate->ss.ps.plan)->direction) ? itemptr_comparator_reverse : itemptr_comparator;
 
 		/* CurrentOfExpr could never appear OR'd with something else */
 		Assert(!tidstate->tss_isCurrentOf);
 
 		qsort((void *) tidList, numTids, sizeof(ItemPointerData),
-			  itemptr_comparator);
+			  cmp);
 		lastTid = 0;
 		for (i = 1; i < numTids; i++)
 		{
@@ -289,6 +294,15 @@ itemptr_comparator(const void *a, const void *b)
 	if (oa > ob)
 		return 1;
 	return 0;
+}
+
+/*
+ * qsort comparator for ItemPointerData items, in reverse order
+ */
+static int
+itemptr_comparator_reverse(const void *a, const void *b)
+{
+	return itemptr_comparator(b,a);
 }
 
 /* ----------------------------------------------------------------
