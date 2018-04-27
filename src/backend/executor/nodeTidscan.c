@@ -226,13 +226,12 @@ TidListEval(TidScanState *tidstate)
 							  RelationGetRelid(tidstate->ss.ss_currentRelation),
 							  &cursor_tid))
 			{
-				if (numTids >= numAllocTids)
-				{
-					numAllocTids *= 2;
-					tidList = (ItemPointerData *)
-						repalloc(tidList,
-								 numAllocTids * sizeof(ItemPointerData));
-				}
+				/*
+				 * A current-of TidExpr only exists by itself, and we should
+				 * already have allocated a tidList entry for it.  We don't
+				 * need to check whether the tidList array needs to be resized.
+				 */
+				Assert(numTids < numAllocTids);
 				tidList[numTids++] = cursor_tid;
 			}
 		}
