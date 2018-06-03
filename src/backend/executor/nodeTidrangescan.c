@@ -155,9 +155,10 @@ TidRangeNext(TidRangeScanState *node)
 	{
 		if (scandesc == NULL)
 		{
-			scandesc = heap_beginscan(node->ss.ss_currentRelation,
-										estate->es_snapshot,
-										0, NULL);
+			scandesc = heap_beginscan_strat(node->ss.ss_currentRelation,
+											estate->es_snapshot,
+											0, NULL,
+											false, false);
 			node->ss.ss_currentScanDesc = scandesc;
 		}
 
