@@ -557,6 +557,65 @@ scalarineqsel(PlannerInfo *root, Oid operator, bool isgt, bool iseq,
 
 	if (!HeapTupleIsValid(vardata->statsTuple))
 	{
+		/*
+		 * There are no stats for system columns, but for CTID we can estimate
+		 * based on table size.
+		 */
+		if (vardata->var && IsA(vardata->var, Var) &&
+			((Var *) vardata->var)->varattno == SelfItemPointerAttributeNumber)
+		{
+			ItemPointer itemptr;
+			double		block;
+			double		density;
+
+			/* If the relation's empty, we're going to include all of it. */
+			if (vardata->rel->pages == 0)
+				return 1.0;
+
+			itemptr = (ItemPointer) DatumGetPointer(constval);
+			block = ItemPointerGetBlockNumberNoCheck(itemptr);
+
+			/*
+			 * Determine the average number of tuples per page (density).  We
+			 * naively assume there will never be any dead tuples or empty
+			 * space at the start or in the middle of the page.  This is
+			 * likely fine for the purposes here.
+			 */
+			density = vardata->rel->tuples / vardata->rel->pages;
+
+			/*
+			 * Using the average tuples per page, calculate how far into the
+			 * page the itemptr is likely to be and adjust block accordingly,
+			 * by adding that fraction of a whole block (but never more than
+			 * a whole block, no matter how high the itemptr's offset is).
+			 */
+			if (density > 0.0)
+			{
+				OffsetNumber offset = ItemPointerGetOffsetNumberNoCheck(itemptr);
+
+				block += Min(offset / density, 1.0);
+			}
+
+			selec = block / (double) vardata->rel->pages;
+
+			/*
+			 * We'll have one less tuple for "<" and one additional tuple for
+			 * ">=", the latter of which we'll reverse the selectivity for
+			 * below, so we can simply subtract a tuple here.  We can easily
+			 * detect these two cases by iseq being equal to isgt.  They'll
+			 * either both be true or both be false.
+			 */
+			if (iseq == isgt && vardata->rel->tuples >= 1.0)
+				selec -= (1 / vardata->rel->tuples);
+
+			/* Finally, reverse the selectivity for the ">", ">=" case. */
+			if (isgt)
+				selec = 1.0 - selec;
+
+			CLAMP_PROBABILITY(selec);
+			return selec;
+		}
+
 		/* no stats available, so default result */
 		return DEFAULT_INEQ_SEL;
 	}
