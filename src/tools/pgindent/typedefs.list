@@ -2339,8 +2339,12 @@ TextPositionState
 TheLexeme
 TheSubstitute
 TidExpr
+TidExprType
 TidHashKey
+TidOpExpr
 TidPath
+TidRange
+TidRangeArray
 TidScan
 TidScanState
 TimeADT

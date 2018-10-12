@@ -3158,6 +3158,41 @@ create_tidscan_plan(PlannerInfo *root, TidPath *best_path,
 			replace_nestloop_params(root, (Node *) scan_clauses);
 	}
 
+
+#if 0
+	/*
+	 * Remove the tidquals from the scan clauses if possible, which is
+	 * generally if the tidquals were taken verbatim from any of the
+	 * RelOptInfo items.  If the tidquals don't represent the entire
+	 * RelOptInfo qual, then nothing will be removed.  Note that the tidquals
+	 * is a list; if there is more than one, we have to rebuild the equivalent
+	 * OR clause to find a match.
+	 */
+	ortidquals = tidquals;
+	if (list_length(ortidquals) > 1)
+		ortidquals = list_make1(make_orclause(ortidquals));
+	scan_clauses = list_difference(scan_clauses, ortidquals);
+
+	/*
+	 * In the case of a single compound qual such as "ctid > ? AND ...", the
+	 * various parts may have come from different RestrictInfos.  So remove
+	 * each part separately.  (This doesn't happen for multiple compound
+	 * quals, because the top-level OR clause can't be split over multiple
+	 * RestrictInfos.
+	 */
+	if (list_length(tidquals) == 1)
+	{
+		Node	   *qual = linitial(tidquals);
+
+		if (and_clause(qual))
+		{
+			BoolExpr   *and_qual = ((BoolExpr *) qual);
+
+			scan_clauses = list_difference(scan_clauses, and_qual->args);
+		}
+	}
+#endif
+
 	scan_plan = make_tidscan(tlist,
 							 scan_clauses,
 							 scan_relid,

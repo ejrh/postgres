@@ -1228,14 +1228,19 @@ typedef struct BitmapOrPath
 /*
  * TidPath represents a scan by TID
  *
- * tidquals is an implicitly OR'ed list of qual expressions of the form
- * "CTID = pseudoconstant", or "CTID = ANY(pseudoconstant_array)",
- * or a CurrentOfExpr for the relation.
+ * tidquals is an implicitly OR'ed list of qual expressions of the forms:
+ *   - "CTID = pseudoconstant"
+ *   - "CTID = ANY(pseudoconstant_array)"
+ *   - "CURRENT OF cursor"
+ *   - "(CTID relop pseudoconstant AND ...)"
+ *
+ * If tidquals is empty, all CTIDs will match (contrary to the usual meaning
+ * of an empty disjunction).
  */
 typedef struct TidPath
 {
 	Path		path;
-	List	   *tidquals;		/* qual(s) involving CTID = something */
+	List	   *tidquals;
 } TidPath;
 
 /*

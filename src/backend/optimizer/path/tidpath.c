@@ -4,13 +4,15 @@
  *	  Routines to determine which TID conditions are usable for scanning
  *	  a given relation, and create TidPaths accordingly.
  *
- * What we are looking for here is WHERE conditions of the form
- * "CTID = pseudoconstant", which can be implemented by just fetching
- * the tuple directly via heap_fetch().  We can also handle OR'd conditions
- * such as (CTID = const1) OR (CTID = const2), as well as ScalarArrayOpExpr
- * conditions of the form CTID = ANY(pseudoconstant_array).  In particular
- * this allows
- *		WHERE ctid IN (tid1, tid2, ...)
+ * What we are looking for here is WHERE conditions of the forms:
+ * - "CTID = pseudoconstant", which can be implemented by just fetching
+ *    the tuple directly via heap_fetch().
+ * - "CTID IN (pseudoconstant, ...)" or "CTID = ANY(pseudoconstant_array)"
+ * - "CTID > pseudoconstant", etc. for >, >=, <, and <=.
+ * - "CTID > pseudoconstant AND CTID < pseudoconstant AND ...", etc.
+ *
+ * We can also handle OR'd conditions of the above form, such as
+ * "(CTID = const1) OR (CTID >= const2) OR CTID IN (...)".
  *
  * As with indexscans, our definition of "pseudoconstant" is pretty liberal:
  * we allow anything that doesn't involve a volatile function or a Var of
@@ -63,14 +65,14 @@ IsCTIDVar(Var *var, RelOptInfo *rel)
 
 /*
  * Check to see if a RestrictInfo is of the form
- *		CTID = pseudoconstant
+ *		CTID OP pseudoconstant
  * or
- *		pseudoconstant = CTID
- * where the CTID Var belongs to relation "rel", and nothing on the
- * other side of the clause does.
+ *		pseudoconstant OP CTID
+ * where OP is a binary operation, the CTID Var belongs to relation "rel",
+ * and nothing on the other side of the clause does.
  */
 static bool
-IsTidEqualClause(RestrictInfo *rinfo, RelOptInfo *rel)
+IsTidBinaryClause(RestrictInfo *rinfo, RelOptInfo *rel)
 {
 	OpExpr	   *node;
 	Node	   *arg1,
@@ -83,9 +85,7 @@ IsTidEqualClause(RestrictInfo *rinfo, RelOptInfo *rel)
 		return false;
 	node = (OpExpr *) rinfo->clause;
 
-	/* Operator must be tideq */
-	if (node->opno != TIDEqualOperator)
-		return false;
+	/* Operator must take two arguments */
 	Assert(list_length(node->args) == 2);
 	arg1 = linitial(node->args);
 	arg2 = lsecond(node->args);
@@ -114,6 +114,43 @@ IsTidEqualClause(RestrictInfo *rinfo, RelOptInfo *rel)
 		return false;
 
 	return true;				/* success */
+}
+
+/*
+ * Check to see if a RestrictInfo is of the form
+ *		CTID = pseudoconstant
+ * or
+ *		pseudoconstant = CTID
+ * where the CTID Var belongs to relation "rel", and nothing on the
+ * other side of the clause does.
+ */
+static bool
+IsTidEqualClause(RestrictInfo *rinfo, RelOptInfo *rel)
+{
+	if (!IsTidBinaryClause(rinfo, rel))
+		return false;
+	return ((OpExpr *) rinfo->clause)->opno == TIDEqualOperator;
+}
+
+/*
+ * Check to see if a RestrictInfo is of the form
+ *		CTID OP pseudoconstant
+ * or
+ *		pseudoconstant OP CTID
+ * where OP is a range operator such as <, <=, >, or >=, the CTID Var belongs
+ * to relation "rel", and nothing on the other side of the clause does.
+ */
+static bool
+IsTidRangeClause(RestrictInfo *rinfo, RelOptInfo *rel)
+{
+	Oid opno;
+	if (!IsTidBinaryClause(rinfo, rel))
+		return false;
+	opno = ((OpExpr *) rinfo->clause)->opno;
+	return opno == TIDLessOperator ||
+		   opno == TIDLessEqOperator ||
+		   opno == TIDGreaterOperator ||
+		   opno == TIDGreaterEqOperator;
 }
 
 /*
@@ -210,6 +247,7 @@ TidQualFromRestrictInfo(RestrictInfo *rinfo, RelOptInfo *rel)
 	 * Check all base cases.  If we get a match, return the clause.
 	 */
 	if (IsTidEqualClause(rinfo, rel) ||
+		IsTidRangeClause(rinfo, rel) ||
 		IsTidEqualAnyClause(rinfo, rel) ||
 		IsCurrentOfClause(rinfo, rel))
 		return list_make1(rinfo);
