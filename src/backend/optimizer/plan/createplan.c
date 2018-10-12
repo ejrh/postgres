@@ -184,7 +184,7 @@ static BitmapHeapScan *make_bitmap_heapscan(List *qptlist,
 					 List *bitmapqualorig,
 					 Index scanrelid);
 static TidScan *make_tidscan(List *qptlist, List *qpqual, Index scanrelid,
-			 List *tidquals);
+			 List *tidquals, ScanDirection scandir);
 static SubqueryScan *make_subqueryscan(List *qptlist,
 				  List *qpqual,
 				  Index scanrelid,
@@ -3115,7 +3115,8 @@ create_tidscan_plan(PlannerInfo *root, TidPath *best_path,
 	scan_plan = make_tidscan(tlist,
 							 scan_clauses,
 							 scan_relid,
-							 tidquals);
+							 tidquals,
+							 best_path->scandir);
 
 	copy_generic_path_info(&scan_plan->scan.plan, &best_path->path);
 
@@ -5176,7 +5177,8 @@ static TidScan *
 make_tidscan(List *qptlist,
 			 List *qpqual,
 			 Index scanrelid,
-			 List *tidquals)
+			 List *tidquals,
+			 ScanDirection scandir)
 {
 	TidScan    *node = makeNode(TidScan);
 	Plan	   *plan = &node->scan.plan;
@@ -5187,6 +5189,7 @@ make_tidscan(List *qptlist,
 	plan->righttree = NULL;
 	node->scan.scanrelid = scanrelid;
 	node->tidquals = tidquals;
+	node->scandir = scandir;
 
 	return node;
 }

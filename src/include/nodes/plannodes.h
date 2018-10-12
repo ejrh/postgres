@@ -486,6 +486,7 @@ typedef struct TidScan
 {
 	Scan		scan;
 	List	   *tidquals;		/* qual(s) involving CTID = something */
+	ScanDirection scandir;
 } TidScan;
 
 /* ----------------

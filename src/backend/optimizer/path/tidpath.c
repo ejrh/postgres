@@ -357,12 +357,17 @@ TidQualFromBaseRestrictinfo(RelOptInfo *rel)
  * create_tidscan_paths
  *	  Create paths corresponding to direct TID scans of the given rel.
  *
+ *	  Path keys will be set to "CTID ASC" by default, or "CTID DESC" if it
+ *	  looks more useful.
+ *
  *	  Candidate paths are added to the rel's pathlist (using add_path).
  */
 void
 create_tidscan_paths(PlannerInfo *root, RelOptInfo *rel)
 {
 	Relids		required_outer;
+	List	   *pathkeys = NIL;
+	ScanDirection scandir = ForwardScanDirection;
 	List	   *tidquals;
 
 	/*
@@ -374,8 +379,37 @@ create_tidscan_paths(PlannerInfo *root, RelOptInfo *rel)
 
 	tidquals = TidQualFromBaseRestrictinfo(rel);
 
-	/* If there are tidquals, then it's worth generating a tidscan path. */
-	if (tidquals)
-		add_path(rel, (Path *) create_tidscan_path(root, rel, tidquals,
-												   required_outer));
+	/*
+	 * Look for a suitable direction by trying both forward and backward
+	 * pathkeys.  But don't set any pathkeys if neither direction helps the
+	 * scan (we don't want to generate tid paths for everything).
+	 */
+	if (has_useful_pathkeys(root, rel))
+	{
+		pathkeys = build_tidscan_pathkeys(root, rel, ForwardScanDirection);
+		if (!pathkeys_contained_in(pathkeys, root->query_pathkeys))
+		{
+			pathkeys = build_tidscan_pathkeys(root, rel, BackwardScanDirection);
+			if (pathkeys_contained_in(pathkeys, root->query_pathkeys))
+				scandir = BackwardScanDirection;
+			else
+				pathkeys = NIL;
+		}
+	}
+	else if (tidquals)
+	{
+		/*
+		 * Otherwise, default to a forward scan -- but only if tid quals were
+		 * found (we don't want to generate tid paths for everything).
+		 */
+		pathkeys = build_tidscan_pathkeys(root, rel, ForwardScanDirection);
+	}
+
+	/*
+	 * If there are tidquals or some useful pathkeys were found, then it's
+	 * worth generating a tidscan path.
+	 */
+	if (tidquals || pathkeys)
+		add_path(rel, (Path *) create_tidscan_path(root, rel, tidquals, pathkeys,
+												   scandir, required_outer));
 }

@@ -63,8 +63,6 @@ EXPLAIN (ANALYZE, COSTS OFF, SUMMARY OFF, TIMING OFF)
 UPDATE tidscan SET id = -id WHERE CURRENT OF c RETURNING *;
 ROLLBACK;
 
-DROP TABLE tidscan;
-
 -- tests for tidrangescans
 
 CREATE TABLE tidrangescan(id integer, data text);
@@ -140,3 +138,40 @@ SELECT ctid FROM tidrangescan_empty WHERE ctid < '(1, 0)';
 EXPLAIN (COSTS OFF)
 SELECT ctid FROM tidrangescan_empty WHERE ctid > '(9, 0)';
 SELECT ctid FROM tidrangescan_empty WHERE ctid > '(9, 0)';
+
+-- check that ordering on a tidscan doesn't require a sort
+EXPLAIN (COSTS OFF)
+SELECT ctid FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid;
+SELECT ctid FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid;
+
+EXPLAIN (COSTS OFF)
+SELECT ctid FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid DESC;
+SELECT ctid FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid DESC;
+
+-- ordering with no quals should use tid range scan
+EXPLAIN (COSTS OFF)
+SELECT ctid FROM tidrangescan ORDER BY ctid ASC;
+
+EXPLAIN (COSTS OFF)
+SELECT ctid FROM tidrangescan ORDER BY ctid DESC;
+
+-- min/max
+EXPLAIN (COSTS OFF)
+SELECT MIN(ctid) FROM tidrangescan;
+SELECT MIN(ctid) FROM tidrangescan;
+
+EXPLAIN (COSTS OFF)
+SELECT MAX(ctid) FROM tidrangescan;
+SELECT MAX(ctid) FROM tidrangescan;
+
+EXPLAIN (COSTS OFF)
+SELECT MIN(ctid) FROM tidrangescan WHERE ctid > '(5,0)';
+SELECT MIN(ctid) FROM tidrangescan WHERE ctid > '(5,0)';
+
+EXPLAIN (COSTS OFF)
+SELECT MAX(ctid) FROM tidrangescan WHERE ctid < '(5,0)';
+SELECT MAX(ctid) FROM tidrangescan WHERE ctid < '(5,0)';
+
+-- clean up
+DROP TABLE tidscan;
+DROP TABLE tidrangescan;

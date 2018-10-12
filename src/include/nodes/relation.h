@@ -1243,6 +1243,7 @@ typedef struct TidPath
 {
 	Path		path;
 	List	   *tidquals;
+	ScanDirection scandir;
 } TidPath;
 
 /*
