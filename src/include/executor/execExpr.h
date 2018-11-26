@@ -267,7 +267,7 @@ typedef struct ExprEvalStep
 			/* tuple descriptor, if known */
 			TupleDesc	known_desc;
 			/* type of slot, can only be relied upon if fixed is set */
-			const TupleTableSlotOps *kind;
+			const		TupleTableSlotOps *kind;
 		}			fetch;
 
 		/* for EEOP_INNER/OUTER/SCAN_[SYS]VAR[_FIRST] */

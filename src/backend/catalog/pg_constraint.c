@@ -413,7 +413,7 @@ CloneForeignKeyConstraints(Oid parentId, Oid relationId, List **cloned)
 							  NULL, 1, &key);
 	while ((tuple = systable_getnext(scan)) != NULL)
 	{
-		Oid		oid = ((Form_pg_constraint) GETSTRUCT(tuple))->oid;
+		Oid			oid = ((Form_pg_constraint) GETSTRUCT(tuple))->oid;
 
 		clone = lappend_oid(clone, oid);
 	}
@@ -591,8 +591,8 @@ clone_fk_constraints(Relation pg_constraint, Relation parentRel,
 
 		/*
 		 * Before creating a new constraint, see whether any existing FKs are
-		 * fit for the purpose.  If one is, attach the parent constraint to it,
-		 * and don't clone anything.  This way we avoid the expensive
+		 * fit for the purpose.  If one is, attach the parent constraint to
+		 * it, and don't clone anything.  This way we avoid the expensive
 		 * verification step and don't end up with a duplicate FK.  This also
 		 * means we don't consider this constraint when recursing to
 		 * partitions.

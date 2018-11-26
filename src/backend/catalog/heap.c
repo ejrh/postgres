@@ -344,6 +344,7 @@ heap_create(const char *relname,
 			break;
 
 		case RELKIND_PARTITIONED_INDEX:
+
 			/*
 			 * Preserve tablespace so that it's used as tablespace for indexes
 			 * on future partitions.

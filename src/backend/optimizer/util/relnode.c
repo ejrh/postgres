@@ -193,7 +193,7 @@ build_simple_rel(PlannerInfo *root, int relid, RelOptInfo *parent)
 	rel->baserestrict_min_security = UINT_MAX;
 	rel->joininfo = NIL;
 	rel->has_eclass_joins = false;
-	rel->consider_partitionwise_join = false; /* might get changed later */
+	rel->consider_partitionwise_join = false;	/* might get changed later */
 	rel->part_scheme = NULL;
 	rel->nparts = 0;
 	rel->boundinfo = NULL;
@@ -608,7 +608,7 @@ build_join_rel(PlannerInfo *root,
 	joinrel->baserestrict_min_security = UINT_MAX;
 	joinrel->joininfo = NIL;
 	joinrel->has_eclass_joins = false;
-	joinrel->consider_partitionwise_join = false; /* might get changed later */
+	joinrel->consider_partitionwise_join = false;	/* might get changed later */
 	joinrel->top_parent_relids = NULL;
 	joinrel->part_scheme = NULL;
 	joinrel->nparts = 0;
@@ -783,7 +783,7 @@ build_child_join_rel(PlannerInfo *root, RelOptInfo *outer_rel,
 	joinrel->baserestrictcost.per_tuple = 0;
 	joinrel->joininfo = NIL;
 	joinrel->has_eclass_joins = false;
-	joinrel->consider_partitionwise_join = false; /* might get changed later */
+	joinrel->consider_partitionwise_join = false;	/* might get changed later */
 	joinrel->top_parent_relids = NULL;
 	joinrel->part_scheme = NULL;
 	joinrel->nparts = 0;

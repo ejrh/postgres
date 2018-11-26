@@ -354,7 +354,7 @@ ConstructTupleDescriptor(Relation heapRelation,
 			/* Simple index column */
 			const FormData_pg_attribute *from;
 
-			Assert(atnum > 0); /* should've been caught above */
+			Assert(atnum > 0);	/* should've been caught above */
 
 			if (atnum > natts)	/* safety check */
 				elog(ERROR, "invalid column number %d", atnum);

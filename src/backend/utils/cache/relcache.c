@@ -4396,7 +4396,7 @@ RelationGetStatExtList(Relation relation)
 
 	while (HeapTupleIsValid(htup = systable_getnext(indscan)))
 	{
-		Oid oid = ((Form_pg_statistic_ext) GETSTRUCT(htup))->oid;
+		Oid			oid = ((Form_pg_statistic_ext) GETSTRUCT(htup))->oid;
 
 		result = insert_ordered_oid(result, oid);
 	}

@@ -235,8 +235,8 @@ ginRedoRecompress(Page page, ginxlogRecompressDataLeaf *data)
 		while (segno < a_segno)
 		{
 			/*
-			 * Once modification is started and page tail is copied, we've
-			 * to copy unmodified segments.
+			 * Once modification is started and page tail is copied, we've to
+			 * copy unmodified segments.
 			 */
 			segsize = SizeOfGinPostingList(oldseg);
 			if (tailCopy)
@@ -287,12 +287,12 @@ ginRedoRecompress(Page page, ginxlogRecompressDataLeaf *data)
 		}
 
 		/*
-		 * We're about to start modification of the page.  So, copy tail of the
-		 * page if it's not done already.
+		 * We're about to start modification of the page.  So, copy tail of
+		 * the page if it's not done already.
 		 */
 		if (!tailCopy && segptr != segmentend)
 		{
-			int tailSize = segmentend - segptr;
+			int			tailSize = segmentend - segptr;
 
 			tailCopy = (Pointer) palloc(tailSize);
 			memcpy(tailCopy, segptr, tailSize);
@@ -334,7 +334,7 @@ ginRedoRecompress(Page page, ginxlogRecompressDataLeaf *data)
 	segptr = (Pointer) oldseg;
 	if (segptr != segmentend && tailCopy)
 	{
-		int restSize = segmentend - segptr;
+		int			restSize = segmentend - segptr;
 
 		Assert(writePtr + restSize <= PageGetSpecialPointer(page));
 		memcpy(writePtr, segptr, restSize);

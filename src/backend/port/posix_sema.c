@@ -45,7 +45,7 @@ typedef union SemTPadded
 {
 	sem_t		pgsem;
 	char		pad[PG_CACHE_LINE_SIZE];
-} SemTPadded;
+}			SemTPadded;
 
 /* typedef PGSemaphore is equivalent to pointer to sem_t */
 typedef struct PGSemaphoreData

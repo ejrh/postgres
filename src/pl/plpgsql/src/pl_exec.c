@@ -6869,8 +6869,8 @@ exec_move_row_from_fields(PLpgSQL_execstate *estate,
 	int			strict_multiassignment_level = 0;
 
 	/*
-	 * The extra check strict strict_multi_assignment can be active,
-	 * only when input tupdesc is specified.
+	 * The extra check strict strict_multi_assignment can be active, only when
+	 * input tupdesc is specified.
 	 */
 	if (tupdesc != NULL)
 	{
@@ -6965,15 +6965,15 @@ exec_move_row_from_fields(PLpgSQL_execstate *estate,
 
 					/* When source value is missing */
 					if (strict_multiassignment_level)
-							ereport(strict_multiassignment_level,
-									(errcode(ERRCODE_DATATYPE_MISMATCH),
-									 errmsg("number of source and target fields in assignment do not match"),
-									 /* translator: %s represents a name of an extra check */
-									 errdetail("%s check of %s is active.",
-											   "strict_multi_assignment",
-													  strict_multiassignment_level == ERROR ? "extra_errors" :
-																	  "extra_warnings"),
-									 errhint("Make sure the query returns the exact list of columns.")));
+						ereport(strict_multiassignment_level,
+								(errcode(ERRCODE_DATATYPE_MISMATCH),
+								 errmsg("number of source and target fields in assignment do not match"),
+						/* translator: %s represents a name of an extra check */
+								 errdetail("%s check of %s is active.",
+										   "strict_multi_assignment",
+										   strict_multiassignment_level == ERROR ? "extra_errors" :
+										   "extra_warnings"),
+								 errhint("Make sure the query returns the exact list of columns.")));
 				}
 
 				/* Cast the new value to the right type, if needed. */
@@ -7002,11 +7002,11 @@ exec_move_row_from_fields(PLpgSQL_execstate *estate,
 					ereport(strict_multiassignment_level,
 							(errcode(ERRCODE_DATATYPE_MISMATCH),
 							 errmsg("number of source and target fields in assignment do not match"),
-							 /* translator: %s represents a name of an extra check */
+					/* translator: %s represents a name of an extra check */
 							 errdetail("%s check of %s is active.",
 									   "strict_multi_assignment",
-										  strict_multiassignment_level == ERROR ? "extra_errors" :
-																	  "extra_warnings"),
+									   strict_multiassignment_level == ERROR ? "extra_errors" :
+									   "extra_warnings"),
 							 errhint("Make sure the query returns the exact list of columns.")));
 			}
 
@@ -7073,15 +7073,15 @@ exec_move_row_from_fields(PLpgSQL_execstate *estate,
 				valtypmod = -1;
 
 				if (strict_multiassignment_level)
-						ereport(strict_multiassignment_level,
-								(errcode(ERRCODE_DATATYPE_MISMATCH),
-								 errmsg("number of source and target fields in assignment do not match"),
-						 /* translator: %s represents a name of an extra check */
-						 errdetail("%s check of %s is active.",
-								  "strict_multi_assignment",
-								  strict_multiassignment_level == ERROR ? "extra_errors" :
-																	  "extra_warnings"),
-								 errhint("Make sure the query returns the exact list of columns.")));
+					ereport(strict_multiassignment_level,
+							(errcode(ERRCODE_DATATYPE_MISMATCH),
+							 errmsg("number of source and target fields in assignment do not match"),
+					/* translator: %s represents a name of an extra check */
+							 errdetail("%s check of %s is active.",
+									   "strict_multi_assignment",
+									   strict_multiassignment_level == ERROR ? "extra_errors" :
+									   "extra_warnings"),
+							 errhint("Make sure the query returns the exact list of columns.")));
 			}
 
 			exec_assign_value(estate, (PLpgSQL_datum *) var,
@@ -7089,8 +7089,8 @@ exec_move_row_from_fields(PLpgSQL_execstate *estate,
 		}
 
 		/*
-		 * When strict_multiassignment extra check is active, ensure there
-		 * are no unassigned source attributes.
+		 * When strict_multiassignment extra check is active, ensure there are
+		 * no unassigned source attributes.
 		 */
 		if (strict_multiassignment_level && anum < td_natts)
 		{
@@ -7102,11 +7102,11 @@ exec_move_row_from_fields(PLpgSQL_execstate *estate,
 				ereport(strict_multiassignment_level,
 						(errcode(ERRCODE_DATATYPE_MISMATCH),
 						 errmsg("number of source and target fields in assignment do not match"),
-						 /* translator: %s represents a name of an extra check */
+				/* translator: %s represents a name of an extra check */
 						 errdetail("%s check of %s is active.",
-								  "strict_multi_assignment",
-								  strict_multiassignment_level == ERROR ? "extra_errors" :
-																	  "extra_warnings"),
+								   "strict_multi_assignment",
+								   strict_multiassignment_level == ERROR ? "extra_errors" :
+								   "extra_warnings"),
 						 errhint("Make sure the query returns the exact list of columns.")));
 		}
 

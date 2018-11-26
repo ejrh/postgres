@@ -2324,6 +2324,7 @@ keep_going:						/* We will come back to here until there is
 					getHostaddr(conn, host_addr, NI_MAXHOST);
 					if (strlen(host_addr) > 0)
 						conn->connip = strdup(host_addr);
+
 					/*
 					 * purposely ignore strdup failure; not a big problem if
 					 * it fails anyway.

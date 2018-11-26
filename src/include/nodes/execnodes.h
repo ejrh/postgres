@@ -966,7 +966,7 @@ typedef struct PlanState
 	/*
 	 * Other run-time state needed by most if not all node types.
 	 */
-	TupleDesc ps_ResultTupleDesc;	/* node's return type */
+	TupleDesc	ps_ResultTupleDesc; /* node's return type */
 	TupleTableSlot *ps_ResultTupleSlot; /* slot for my result tuples */
 	ExprContext *ps_ExprContext;	/* node's expression-evaluation context */
 	ProjectionInfo *ps_ProjInfo;	/* info for doing tuple projection */
@@ -1001,18 +1001,18 @@ typedef struct PlanState
 	 * ExecConditionalAssignProjectionInfo() defaults those fields to the scan
 	 * operations.
 	 */
-	const TupleTableSlotOps *scanops;
-	const TupleTableSlotOps *outerops;
-	const TupleTableSlotOps *innerops;
-	const TupleTableSlotOps *resultops;
-	bool scanopsfixed;
-	bool outeropsfixed;
-	bool inneropsfixed;
-	bool resultopsfixed;
-	bool scanopsset;
-	bool outeropsset;
-	bool inneropsset;
-	bool resultopsset;
+	const		TupleTableSlotOps *scanops;
+	const		TupleTableSlotOps *outerops;
+	const		TupleTableSlotOps *innerops;
+	const		TupleTableSlotOps *resultops;
+	bool		scanopsfixed;
+	bool		outeropsfixed;
+	bool		inneropsfixed;
+	bool		resultopsfixed;
+	bool		scanopsset;
+	bool		outeropsset;
+	bool		inneropsset;
+	bool		resultopsset;
 } PlanState;
 
 /* ----------------
@@ -1100,8 +1100,8 @@ typedef struct ModifyTableState
 	PlanState **mt_plans;		/* subplans (one per target rel) */
 	int			mt_nplans;		/* number of plans in the array */
 	int			mt_whichplan;	/* which one is being executed (0..n-1) */
-	TupleTableSlot** mt_scans;	/* input tuple corresponding to underlying
-								   plans */
+	TupleTableSlot **mt_scans;	/* input tuple corresponding to underlying
+								 * plans */
 	ResultRelInfo *resultRelInfo;	/* per-subplan target relations */
 	ResultRelInfo *rootResultRelInfo;	/* root target relation (partitioned
 										 * table root) */

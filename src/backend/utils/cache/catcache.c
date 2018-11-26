@@ -1961,10 +1961,10 @@ CatCacheCopyKeys(TupleDesc tupdesc, int nkeys, int *attnos,
 		NameData	srcname;
 
 		/*
-		 * Must be careful in case the caller passed a C string where a
-		 * NAME is wanted: convert the given argument to a correctly
-		 * padded NAME.  Otherwise the memcpy() done by datumCopy() could
-		 * fall off the end of memory.
+		 * Must be careful in case the caller passed a C string where a NAME
+		 * is wanted: convert the given argument to a correctly padded NAME.
+		 * Otherwise the memcpy() done by datumCopy() could fall off the end
+		 * of memory.
 		 */
 		if (att->atttypid == NAMEOID)
 		{

@@ -3719,7 +3719,7 @@ eval_const_expressions_mutator(Node *node,
 		case T_ConvertRowtypeExpr:
 			{
 				ConvertRowtypeExpr *cre = castNode(ConvertRowtypeExpr, node);
-				Node		   *arg;
+				Node	   *arg;
 				ConvertRowtypeExpr *newcre;
 
 				arg = eval_const_expressions_mutator((Node *) cre->arg,

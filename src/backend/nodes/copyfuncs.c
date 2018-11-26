@@ -1186,7 +1186,7 @@ _copyPartitionPruneInfo(const PartitionPruneInfo *from)
 }
 
 static PartitionedRelPruneInfo *
-_copyPartitionedRelPruneInfo(const PartitionedRelPruneInfo *from)
+_copyPartitionedRelPruneInfo(const PartitionedRelPruneInfo * from)
 {
 	PartitionedRelPruneInfo *newnode = makeNode(PartitionedRelPruneInfo);
 

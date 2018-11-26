@@ -124,7 +124,7 @@ rbt_create(Size node_size,
 
 /* Copy the additional data fields from one RBTNode to another */
 static inline void
-rbt_copy_data(RBTree *rbt, RBTNode *dest, const RBTNode *src)
+rbt_copy_data(RBTree *rbt, RBTNode * dest, const RBTNode * src)
 {
 	memcpy(dest + 1, src + 1, rbt->node_size - sizeof(RBTNode));
 }
@@ -142,7 +142,7 @@ rbt_copy_data(RBTree *rbt, RBTNode *dest, const RBTNode *src)
  * Returns the matching tree entry, or NULL if no match is found.
  */
 RBTNode *
-rbt_find(RBTree *rbt, const RBTNode *data)
+rbt_find(RBTree *rbt, const RBTNode * data)
 {
 	RBTNode    *node = rbt->root;
 
@@ -198,7 +198,7 @@ rbt_leftmost(RBTree *rbt)
  * child of that node.
  */
 static void
-rbt_rotate_left(RBTree *rbt, RBTNode *x)
+rbt_rotate_left(RBTree *rbt, RBTNode * x)
 {
 	RBTNode    *y = x->right;
 
@@ -235,7 +235,7 @@ rbt_rotate_left(RBTree *rbt, RBTNode *x)
  * child of that node.
  */
 static void
-rbt_rotate_right(RBTree *rbt, RBTNode *x)
+rbt_rotate_right(RBTree *rbt, RBTNode * x)
 {
 	RBTNode    *y = x->left;
 
@@ -279,7 +279,7 @@ rbt_rotate_right(RBTree *rbt, RBTNode *x)
  * the invariant that every leaf has equal black-height.)
  */
 static void
-rbt_insert_fixup(RBTree *rbt, RBTNode *x)
+rbt_insert_fixup(RBTree *rbt, RBTNode * x)
 {
 	/*
 	 * x is always a red node.  Initially, it is the newly inserted node. Each
@@ -388,7 +388,7 @@ rbt_insert_fixup(RBTree *rbt, RBTNode *x)
  * variable in the caller.
  */
 RBTNode *
-rbt_insert(RBTree *rbt, const RBTNode *data, bool *isNew)
+rbt_insert(RBTree *rbt, const RBTNode * data, bool *isNew)
 {
 	RBTNode    *current,
 			   *parent,
@@ -456,7 +456,7 @@ rbt_insert(RBTree *rbt, const RBTNode *data, bool *isNew)
  * Maintain Red-Black tree balance after deleting a black node.
  */
 static void
-rbt_delete_fixup(RBTree *rbt, RBTNode *x)
+rbt_delete_fixup(RBTree *rbt, RBTNode * x)
 {
 	/*
 	 * x is always a black node.  Initially, it is the former child of the
@@ -554,7 +554,7 @@ rbt_delete_fixup(RBTree *rbt, RBTNode *x)
  * Delete node z from tree.
  */
 static void
-rbt_delete_node(RBTree *rbt, RBTNode *z)
+rbt_delete_node(RBTree *rbt, RBTNode * z)
 {
 	RBTNode    *x,
 			   *y;
@@ -630,7 +630,7 @@ rbt_delete_node(RBTree *rbt, RBTNode *z)
  * may be the one actually freed!)
  */
 void
-rbt_delete(RBTree *rbt, RBTNode *node)
+rbt_delete(RBTree *rbt, RBTNode * node)
 {
 	rbt_delete_node(rbt, node);
 }

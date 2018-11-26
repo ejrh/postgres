@@ -1438,7 +1438,7 @@ ExecInitMergeJoin(MergeJoin *node, EState *estate, int eflags)
 	MergeJoinState *mergestate;
 	TupleDesc	outerDesc,
 				innerDesc;
-	const TupleTableSlotOps *innerOps;
+	const		TupleTableSlotOps *innerOps;
 
 	/* check for unsupported flags */
 	Assert(!(eflags & (EXEC_FLAG_BACKWARD | EXEC_FLAG_MARK)));

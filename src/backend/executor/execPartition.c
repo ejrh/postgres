@@ -147,9 +147,9 @@ typedef struct PartitionDispatchData
 /* struct to hold result relations coming from UPDATE subplans */
 typedef struct SubplanResultRelHashElem
 {
-	Oid		relid;		/* hash key -- must be first */
+	Oid			relid;			/* hash key -- must be first */
 	ResultRelInfo *rri;
-} SubplanResultRelHashElem;
+}			SubplanResultRelHashElem;
 
 
 static void ExecHashSubPlanResultRelsByOid(ModifyTableState *mtstate,
@@ -180,7 +180,7 @@ static char *ExecBuildSlotPartitionKeyDescription(Relation rel,
 									 int maxfieldlen);
 static List *adjust_partition_tlist(List *tlist, TupleConversionMap *map);
 static void find_matching_subplans_recurse(PartitionPruningData *prunedata,
-							   PartitionedRelPruningData *pprune,
+							   PartitionedRelPruningData * pprune,
 							   bool initial_prune,
 							   Bitmapset **validsubplans);
 
@@ -370,7 +370,7 @@ ExecFindPartition(ModifyTableState *mtstate,
 				if (proute->subplan_resultrel_htab)
 				{
 					Oid			partoid = partdesc->oids[partidx];
-					SubplanResultRelHashElem   *elem;
+					SubplanResultRelHashElem *elem;
 
 					elem = hash_search(proute->subplan_resultrel_htab,
 									   &partoid, HASH_FIND, NULL);
@@ -468,7 +468,7 @@ ExecHashSubPlanResultRelsByOid(ModifyTableState *mtstate,
 		ResultRelInfo *rri = &mtstate->resultRelInfo[i];
 		bool		found;
 		Oid			partoid = RelationGetRelid(rri->ri_RelationDesc);
-		SubplanResultRelHashElem   *elem;
+		SubplanResultRelHashElem *elem;
 
 		elem = (SubplanResultRelHashElem *)
 			hash_search(htab, &partoid, HASH_ENTER, &found);
@@ -868,7 +868,7 @@ ExecInitRoutingInfo(ModifyTableState *mtstate,
 {
 	MemoryContext oldcxt;
 	PartitionRoutingInfo *partrouteinfo;
-	int		rri_index;
+	int			rri_index;
 
 	oldcxt = MemoryContextSwitchTo(proute->memcxt);
 
@@ -1930,7 +1930,7 @@ ExecFindMatchingSubPlans(PartitionPruneState *prunestate)
  */
 static void
 find_matching_subplans_recurse(PartitionPruningData *prunedata,
-							   PartitionedRelPruningData *pprune,
+							   PartitionedRelPruningData * pprune,
 							   bool initial_prune,
 							   Bitmapset **validsubplans)
 {

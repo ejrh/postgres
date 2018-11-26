@@ -305,7 +305,7 @@ typedef struct
 {
 	char	   *name;
 	int			dbnum;
-} LibraryInfo;
+}			LibraryInfo;
 
 /*
  * OSInfo
@@ -374,7 +374,7 @@ bool		pid_lock_file_exists(const char *datadir);
 /* file.c */
 
 void cloneFile(const char *src, const char *dst,
-		 const char *schemaName, const char *relName);
+		  const char *schemaName, const char *relName);
 void copyFile(const char *src, const char *dst,
 		 const char *schemaName, const char *relName);
 void linkFile(const char *src, const char *dst,

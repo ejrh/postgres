@@ -275,7 +275,7 @@ extern void be_tls_get_peerdn_name(Port *port, char *ptr, size_t len);
 extern char *be_tls_get_certificate_hash(Port *port, size_t *len);
 #endif
 
-#endif	/* USE_SSL */
+#endif							/* USE_SSL */
 
 extern ProtocolVersion FrontendProtocol;
 

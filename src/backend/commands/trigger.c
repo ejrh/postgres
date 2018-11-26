@@ -4288,7 +4288,7 @@ AfterTriggerExecute(AfterTriggerEvent event,
 			 * context, in the slot anyway.
 			 */
 			LocTriggerData.tg_trigtuple = ExecFetchSlotHeapTuple(trig_tuple_slot1,
-																	true, NULL);
+																 true, NULL);
 			LocTriggerData.tg_trigtuplebuf = InvalidBuffer;
 
 			LocTriggerData.tg_newtuple =

@@ -277,7 +277,7 @@ llvm_compile_expr(ExprState *state)
 					LLVMBasicBlockRef b_fetch;
 					LLVMValueRef v_nvalid;
 					LLVMValueRef l_jit_deform = NULL;
-					const TupleTableSlotOps *tts_ops = NULL;
+					const		TupleTableSlotOps *tts_ops = NULL;
 
 					b_fetch = l_bb_before_v(opblocks[i + 1],
 											"op.%d.fetch", i);

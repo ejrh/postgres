@@ -1717,10 +1717,9 @@ DropRelationFiles(RelFileNode *delrels, int ndelrels, bool isRedo)
 	smgrdounlinkall(srels, ndelrels, isRedo);
 
 	/*
-	 * Call smgrclose() in reverse order as when smgropen() is called.
-	 * This trick enables remove_from_unowned_list() in smgrclose()
-	 * to search the SMgrRelation from the unowned list,
-	 * with O(1) performance.
+	 * Call smgrclose() in reverse order as when smgropen() is called. This
+	 * trick enables remove_from_unowned_list() in smgrclose() to search the
+	 * SMgrRelation from the unowned list, with O(1) performance.
 	 */
 	for (i = ndelrels - 1; i >= 0; i--)
 		smgrclose(srels[i]);

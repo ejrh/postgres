@@ -4374,7 +4374,7 @@ static struct config_enum ConfigureNamesEnum[] =
 		},
 		&ssl_min_protocol_version,
 		PG_TLS1_VERSION,
-		ssl_protocol_versions_info + 1 /* don't allow PG_TLS_ANY */,
+		ssl_protocol_versions_info + 1 /* don't allow PG_TLS_ANY */ ,
 		NULL, NULL, NULL
 	},
 
@@ -11068,6 +11068,7 @@ assign_recovery_target(const char *newval, void *extra)
 	if (newval && strcmp(newval, "") != 0)
 		recoveryTarget = RECOVERY_TARGET_IMMEDIATE;
 	else
+
 		/*
 		 * Reset recoveryTarget to RECOVERY_TARGET_UNSET to proper handle user
 		 * setting multiple recovery_target with blank value on last.

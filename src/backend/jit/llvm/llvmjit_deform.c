@@ -32,7 +32,7 @@
  */
 LLVMValueRef
 slot_compile_deform(LLVMJitContext *context, TupleDesc desc,
-					const TupleTableSlotOps *ops, int natts)
+					const TupleTableSlotOps * ops, int natts)
 {
 	char	   *funcname;
 

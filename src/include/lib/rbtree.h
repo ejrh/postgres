@@ -26,7 +26,7 @@ typedef struct RBTNode
 	struct RBTNode *left;		/* left child, or RBTNIL if none */
 	struct RBTNode *right;		/* right child, or RBTNIL if none */
 	struct RBTNode *parent;		/* parent, or NULL (not RBTNIL!) if none */
-} RBTNode;
+}			RBTNode;
 
 /* Opaque struct representing a whole tree */
 typedef struct RBTree RBTree;
@@ -36,7 +36,7 @@ typedef enum RBTOrderControl
 {
 	LeftRightWalk,				/* inorder: left child, node, right child */
 	RightLeftWalk				/* reverse inorder: right, node, left */
-} RBTOrderControl;
+}			RBTOrderControl;
 
 /*
  * RBTreeIterator holds state while traversing a tree.  This is declared
@@ -54,10 +54,10 @@ struct RBTreeIterator
 };
 
 /* Support functions to be provided by caller */
-typedef int (*rbt_comparator) (const RBTNode *a, const RBTNode *b, void *arg);
-typedef void (*rbt_combiner) (RBTNode *existing, const RBTNode *newdata, void *arg);
-typedef RBTNode *(*rbt_allocfunc) (void *arg);
-typedef void (*rbt_freefunc) (RBTNode *x, void *arg);
+typedef int (*rbt_comparator) (const RBTNode * a, const RBTNode * b, void *arg);
+typedef void (*rbt_combiner) (RBTNode * existing, const RBTNode * newdata, void *arg);
+typedef RBTNode * (*rbt_allocfunc) (void *arg);
+typedef void (*rbt_freefunc) (RBTNode * x, void *arg);
 
 extern RBTree *rbt_create(Size node_size,
 		   rbt_comparator comparator,
@@ -66,14 +66,14 @@ extern RBTree *rbt_create(Size node_size,
 		   rbt_freefunc freefunc,
 		   void *arg);
 
-extern RBTNode *rbt_find(RBTree *rbt, const RBTNode *data);
-extern RBTNode *rbt_leftmost(RBTree *rbt);
+extern RBTNode * rbt_find(RBTree *rbt, const RBTNode * data);
+extern RBTNode * rbt_leftmost(RBTree *rbt);
 
-extern RBTNode *rbt_insert(RBTree *rbt, const RBTNode *data, bool *isNew);
-extern void rbt_delete(RBTree *rbt, RBTNode *node);
+extern RBTNode * rbt_insert(RBTree *rbt, const RBTNode * data, bool *isNew);
+extern void rbt_delete(RBTree *rbt, RBTNode * node);
 
 extern void rbt_begin_iterate(RBTree *rbt, RBTOrderControl ctrl,
 				  RBTreeIterator *iter);
-extern RBTNode *rbt_iterate(RBTreeIterator *iter);
+extern RBTNode * rbt_iterate(RBTreeIterator *iter);
 
 #endif							/* RBTREE_H */

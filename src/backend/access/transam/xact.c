@@ -487,9 +487,9 @@ AssignTransactionId(TransactionState s)
 
 	/*
 	 * Ensure parent(s) have XIDs, so that a child always has an XID later
-	 * than its parent.  Mustn't recurse here, or we might get a stack overflow
-	 * if we're at the bottom of a huge stack of subtransactions none of which
-	 * have XIDs yet.
+	 * than its parent.  Mustn't recurse here, or we might get a stack
+	 * overflow if we're at the bottom of a huge stack of subtransactions none
+	 * of which have XIDs yet.
 	 */
 	if (isSubXact && !TransactionIdIsValid(s->parent->transactionId))
 	{

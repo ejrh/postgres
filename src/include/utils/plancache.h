@@ -191,6 +191,6 @@ typedef enum
 }			PlanCacheMode;
 
 /* GUC parameter */
-extern int plan_cache_mode;
+extern int	plan_cache_mode;
 
 #endif							/* PLANCACHE_H */

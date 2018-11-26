@@ -71,16 +71,15 @@
 
 static TupleDesc ExecTypeFromTLInternal(List *targetList,
 					   bool skipjunk);
-static pg_attribute_always_inline void
-slot_deform_heap_tuple(TupleTableSlot *slot, HeapTuple tuple, uint32 *offp,
+static pg_attribute_always_inline void slot_deform_heap_tuple(TupleTableSlot *slot, HeapTuple tuple, uint32 *offp,
 					   int natts);
 static void tts_buffer_heap_store_tuple(TupleTableSlot *slot, HeapTuple tuple, Buffer buffer);
 
 
-const TupleTableSlotOps TTSOpsVirtual;
-const TupleTableSlotOps TTSOpsHeapTuple;
-const TupleTableSlotOps TTSOpsMinimalTuple;
-const TupleTableSlotOps TTSOpsBufferHeapTuple;
+const		TupleTableSlotOps TTSOpsVirtual;
+const		TupleTableSlotOps TTSOpsHeapTuple;
+const		TupleTableSlotOps TTSOpsMinimalTuple;
+const		TupleTableSlotOps TTSOpsBufferHeapTuple;
 
 
 /*
@@ -133,7 +132,7 @@ tts_virtual_getsysattr(TupleTableSlot *slot, int attnum, bool *isnull)
 {
 	elog(ERROR, "virtual tuple table slot does not have system atttributes");
 
-	return 0; /* silence compiler warnings */
+	return 0;					/* silence compiler warnings */
 }
 
 /*
@@ -159,7 +158,7 @@ tts_virtual_materialize(TupleTableSlot *slot)
 	for (int natt = 0; natt < desc->natts; natt++)
 	{
 		Form_pg_attribute att = TupleDescAttr(desc, natt);
-		Datum val;
+		Datum		val;
 
 		if (att->attbyval || slot->tts_isnull[natt])
 			continue;
@@ -195,7 +194,7 @@ tts_virtual_materialize(TupleTableSlot *slot)
 	for (int natt = 0; natt < desc->natts; natt++)
 	{
 		Form_pg_attribute att = TupleDescAttr(desc, natt);
-		Datum val;
+		Datum		val;
 
 		if (att->attbyval || slot->tts_isnull[natt])
 			continue;
@@ -205,7 +204,7 @@ tts_virtual_materialize(TupleTableSlot *slot)
 		if (att->attlen == -1 &&
 			VARATT_IS_EXTERNAL_EXPANDED(DatumGetPointer(val)))
 		{
-			Size data_length;
+			Size		data_length;
 
 			/*
 			 * We want to flatten the expanded value so that the materialized
@@ -223,7 +222,7 @@ tts_virtual_materialize(TupleTableSlot *slot)
 		}
 		else
 		{
-			Size data_length = 0;
+			Size		data_length = 0;
 
 			data = (char *) att_align_nominal(data, att->attalign);
 			data_length = att_addlength_datum(data_length, att->attlen, val);
@@ -376,7 +375,7 @@ tts_heap_materialize(TupleTableSlot *slot)
 static void
 tts_heap_copyslot(TupleTableSlot *dstslot, TupleTableSlot *srcslot)
 {
-	HeapTuple tuple;
+	HeapTuple	tuple;
 	MemoryContext oldcontext;
 
 	oldcontext = MemoryContextSwitchTo(dstslot->tts_mcxt);
@@ -491,7 +490,7 @@ tts_minimal_getsysattr(TupleTableSlot *slot, int attnum, bool *isnull)
 {
 	elog(ERROR, "minimal tuple table slot does not have system atttributes");
 
-	return 0; /* silence compiler warnings */
+	return 0;					/* silence compiler warnings */
 }
 
 static void
@@ -744,6 +743,7 @@ tts_buffer_heap_copyslot(TupleTableSlot *dstslot, TupleTableSlot *srcslot)
 	else
 	{
 		tts_buffer_heap_store_tuple(dstslot, bsrcslot->base.tuple, bsrcslot->buffer);
+
 		/*
 		 * Need to materialize because the HeapTupleData portion of the tuple
 		 * might be in a foreign memory context. That's annoying, but until
@@ -944,7 +944,7 @@ slot_deform_heap_tuple(TupleTableSlot *slot, HeapTuple tuple, uint32 *offp,
 }
 
 
-const TupleTableSlotOps TTSOpsVirtual = {
+const		TupleTableSlotOps TTSOpsVirtual = {
 	.base_slot_size = sizeof(VirtualTupleTableSlot),
 	.init = tts_virtual_init,
 	.release = tts_virtual_release,
@@ -964,7 +964,7 @@ const TupleTableSlotOps TTSOpsVirtual = {
 	.copy_minimal_tuple = tts_virtual_copy_minimal_tuple
 };
 
-const TupleTableSlotOps TTSOpsHeapTuple = {
+const		TupleTableSlotOps TTSOpsHeapTuple = {
 	.base_slot_size = sizeof(HeapTupleTableSlot),
 	.init = tts_heap_init,
 	.release = tts_heap_release,
@@ -981,7 +981,7 @@ const TupleTableSlotOps TTSOpsHeapTuple = {
 	.copy_minimal_tuple = tts_heap_copy_minimal_tuple
 };
 
-const TupleTableSlotOps TTSOpsMinimalTuple = {
+const		TupleTableSlotOps TTSOpsMinimalTuple = {
 	.base_slot_size = sizeof(MinimalTupleTableSlot),
 	.init = tts_minimal_init,
 	.release = tts_minimal_release,
@@ -998,7 +998,7 @@ const TupleTableSlotOps TTSOpsMinimalTuple = {
 	.copy_minimal_tuple = tts_minimal_copy_minimal_tuple
 };
 
-const TupleTableSlotOps TTSOpsBufferHeapTuple = {
+const		TupleTableSlotOps TTSOpsBufferHeapTuple = {
 	.base_slot_size = sizeof(BufferHeapTupleTableSlot),
 	.init = tts_buffer_heap_init,
 	.release = tts_buffer_heap_release,
@@ -1032,10 +1032,12 @@ const TupleTableSlotOps TTSOpsBufferHeapTuple = {
  */
 TupleTableSlot *
 MakeTupleTableSlot(TupleDesc tupleDesc,
-				   const TupleTableSlotOps *tts_ops)
+				   const TupleTableSlotOps * tts_ops)
 {
-	Size		basesz, allocsz;
+	Size		basesz,
+				allocsz;
 	TupleTableSlot *slot;
+
 	basesz = tts_ops->base_slot_size;
 
 	/*
@@ -1051,7 +1053,7 @@ MakeTupleTableSlot(TupleDesc tupleDesc,
 
 	slot = palloc0(allocsz);
 	/* const for optimization purposes, OK to modify at allocation time */
-	*((const TupleTableSlotOps **) &slot->tts_ops) = tts_ops;
+	*((const TupleTableSlotOps * *) &slot->tts_ops) = tts_ops;
 	slot->type = T_TupleTableSlot;
 	slot->tts_flags |= TTS_FLAG_EMPTY;
 	if (tupleDesc != NULL)
@@ -1089,7 +1091,7 @@ MakeTupleTableSlot(TupleDesc tupleDesc,
  */
 TupleTableSlot *
 ExecAllocTableSlot(List **tupleTable, TupleDesc desc,
-				   const TupleTableSlotOps *tts_ops)
+				   const TupleTableSlotOps * tts_ops)
 {
 	TupleTableSlot *slot = MakeTupleTableSlot(desc, tts_ops);
 
@@ -1156,7 +1158,7 @@ ExecResetTupleTable(List *tupleTable,	/* tuple table */
  */
 TupleTableSlot *
 MakeSingleTupleTableSlot(TupleDesc tupdesc,
-						 const TupleTableSlotOps *tts_ops)
+						 const TupleTableSlotOps * tts_ops)
 {
 	TupleTableSlot *slot = MakeTupleTableSlot(tupdesc, tts_ops);
 
@@ -1625,7 +1627,7 @@ ExecInitResultTypeTL(PlanState *planstate)
  * ----------------
  */
 void
-ExecInitResultSlot(PlanState *planstate, const TupleTableSlotOps *tts_ops)
+ExecInitResultSlot(PlanState *planstate, const TupleTableSlotOps * tts_ops)
 {
 	TupleTableSlot *slot;
 
@@ -1646,7 +1648,7 @@ ExecInitResultSlot(PlanState *planstate, const TupleTableSlotOps *tts_ops)
  */
 void
 ExecInitResultTupleSlotTL(PlanState *planstate,
-						  const TupleTableSlotOps *tts_ops)
+						  const TupleTableSlotOps * tts_ops)
 {
 	ExecInitResultTypeTL(planstate);
 	ExecInitResultSlot(planstate, tts_ops);
@@ -1658,7 +1660,7 @@ ExecInitResultTupleSlotTL(PlanState *planstate,
  */
 void
 ExecInitScanTupleSlot(EState *estate, ScanState *scanstate,
-					  TupleDesc tupledesc, const TupleTableSlotOps *tts_ops)
+					  TupleDesc tupledesc, const TupleTableSlotOps * tts_ops)
 {
 	scanstate->ss_ScanTupleSlot = ExecAllocTableSlot(&estate->es_tupleTable,
 													 tupledesc, tts_ops);
@@ -1679,7 +1681,7 @@ ExecInitScanTupleSlot(EState *estate, ScanState *scanstate,
 TupleTableSlot *
 ExecInitExtraTupleSlot(EState *estate,
 					   TupleDesc tupledesc,
-					   const TupleTableSlotOps *tts_ops)
+					   const TupleTableSlotOps * tts_ops)
 {
 	return ExecAllocTableSlot(&estate->es_tupleTable, tupledesc, tts_ops);
 }
@@ -1694,7 +1696,7 @@ ExecInitExtraTupleSlot(EState *estate,
  */
 TupleTableSlot *
 ExecInitNullTupleSlot(EState *estate, TupleDesc tupType,
-					  const TupleTableSlotOps *tts_ops)
+					  const TupleTableSlotOps * tts_ops)
 {
 	TupleTableSlot *slot = ExecInitExtraTupleSlot(estate, tupType, tts_ops);
 
@@ -1752,7 +1754,7 @@ void
 slot_getsomeattrs_int(TupleTableSlot *slot, int attnum)
 {
 	/* Check for caller errors */
-	Assert(slot->tts_nvalid < attnum); /* slot_getsomeattr checked */
+	Assert(slot->tts_nvalid < attnum);	/* slot_getsomeattr checked */
 	Assert(attnum > 0);
 
 	if (unlikely(attnum > slot->tts_tupleDescriptor->natts))
@@ -1762,8 +1764,8 @@ slot_getsomeattrs_int(TupleTableSlot *slot, int attnum)
 	slot->tts_ops->getsomeattrs(slot, attnum);
 
 	/*
-	 * If the underlying tuple doesn't have enough attributes, tuple descriptor
-	 * must have the missing attributes.
+	 * If the underlying tuple doesn't have enough attributes, tuple
+	 * descriptor must have the missing attributes.
 	 */
 	if (unlikely(slot->tts_nvalid < attnum))
 	{
@@ -2115,7 +2117,7 @@ HeapTupleHeaderGetDatum(HeapTupleHeader tuple)
 TupOutputState *
 begin_tup_output_tupdesc(DestReceiver *dest,
 						 TupleDesc tupdesc,
-						 const TupleTableSlotOps *tts_ops)
+						 const TupleTableSlotOps * tts_ops)
 {
 	TupOutputState *tstate;
 

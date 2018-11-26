@@ -67,10 +67,10 @@ static bool SSL_initialized = false;
 static bool dummy_ssl_passwd_cb_called = false;
 static bool ssl_is_server_start;
 
-static int ssl_protocol_version_to_openssl(int v, const char *guc_name);
+static int	ssl_protocol_version_to_openssl(int v, const char *guc_name);
 #ifndef SSL_CTX_set_min_proto_version
-static int SSL_CTX_set_min_proto_version(SSL_CTX *ctx, int version);
-static int SSL_CTX_set_max_proto_version(SSL_CTX *ctx, int version);
+static int	SSL_CTX_set_min_proto_version(SSL_CTX *ctx, int version);
+static int	SSL_CTX_set_max_proto_version(SSL_CTX *ctx, int version);
 #endif
 
 
