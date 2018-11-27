@@ -580,8 +580,16 @@ scalarineqsel(PlannerInfo *root, Oid operator, bool isgt, bool iseq,
 			 * naively assume there will never be any dead tuples or empty
 			 * space at the start or in the middle of the page.  This is
 			 * likely fine for the purposes here.
+			 *
+			 * Since the last page will, on average, be only half full, we
+			 * can estimate it to have half as many tuples as earlier pages.  
+			 * So give it half the weight of a regular page.
 			 */
-			density = vardata->rel->tuples / vardata->rel->pages;
+			density = vardata->rel->tuples / (vardata->rel->pages - 0.5);
+
+			/* If it's the last page, it has half the density. */
+			if (block >= vardata->rel->pages - 1)
+				density *= 0.5;
 
 			/*
 			 * Using the average tuples per page, calculate how far into the
@@ -596,7 +604,11 @@ scalarineqsel(PlannerInfo *root, Oid operator, bool isgt, bool iseq,
 				block += Min(offset / density, 1.0);
 			}
 
-			selec = block / (double) vardata->rel->pages;
+			/*
+			 * Again, the last page has only half weight when converting the
+			 * relative block number to a selectivity.
+			 */
+			selec = block / (vardata->rel->pages - 0.5);
 
 			/*
 			 * We'll have one less tuple for "<" and one additional tuple for
