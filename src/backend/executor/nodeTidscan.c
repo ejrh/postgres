@@ -816,6 +816,15 @@ TidNext(TidScanState *node)
 
 	numRanges = node->tss_NumTidRanges;
 
+	/* If the plan direction is backward, invert the direction. */
+	if (ScanDirectionIsBackward(((TidScan *) node->ss.ps.plan)->scandir))
+	{
+		if (ScanDirectionIsForward(direction))
+			direction = BackwardScanDirection;
+		else if (ScanDirectionIsBackward(direction))
+			direction = ForwardScanDirection;
+	}
+
 	tuple = NULL;
 	for (;;)
 	{

@@ -605,6 +605,7 @@ _outTidScan(StringInfo str, const TidScan *node)
 	_outScanInfo(str, (const Scan *) node);
 
 	WRITE_NODE_FIELD(tidquals);
+	WRITE_ENUM_FIELD(scandir, ScanDirection);
 }
 
 static void
@@ -1793,6 +1794,7 @@ _outTidPath(StringInfo str, const TidPath *node)
 	_outPathInfo(str, (const Path *) node);
 
 	WRITE_NODE_FIELD(tidquals);
+	WRITE_ENUM_FIELD(scandir, ScanDirection);
 }
 
 static void
