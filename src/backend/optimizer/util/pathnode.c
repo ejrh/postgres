@@ -1186,7 +1186,7 @@ create_bitmap_or_path(PlannerInfo *root,
  */
 TidPath *
 create_tidscan_path(PlannerInfo *root, RelOptInfo *rel, List *tidquals,
-					Relids required_outer)
+					List *pathkeys, Relids required_outer)
 {
 	TidPath    *pathnode = makeNode(TidPath);
 
@@ -1198,7 +1198,7 @@ create_tidscan_path(PlannerInfo *root, RelOptInfo *rel, List *tidquals,
 	pathnode->path.parallel_aware = false;
 	pathnode->path.parallel_safe = rel->consider_parallel;
 	pathnode->path.parallel_workers = 0;
-	pathnode->path.pathkeys = NIL;	/* always unordered */
+	pathnode->path.pathkeys = pathkeys;
 
 	pathnode->tidquals = tidquals;
 

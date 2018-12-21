@@ -18,6 +18,9 @@
 #include "postgres.h"
 
 #include "access/stratnum.h"
+#include "access/sysattr.h"
+#include "catalog/pg_operator.h"
+#include "catalog/pg_type.h"
 #include "nodes/makefuncs.h"
 #include "nodes/nodeFuncs.h"
 #include "nodes/plannodes.h"
@@ -846,6 +849,33 @@ build_join_pathkeys(PlannerInfo *root,
 	 * uninteresting to higher levels.
 	 */
 	return truncate_useless_pathkeys(root, joinrel, outer_pathkeys);
+}
+
+/*
+ * build_tidscan_pathkeys
+ *	  Build the path keys corresponding to ORDER BY ctid ASC.
+ */
+List *
+build_tidscan_pathkeys(PlannerInfo *root,
+					   RelOptInfo *rel)
+{
+	Expr	   *expr;
+	List	   *pathkeys;
+
+	expr = (Expr *) makeVar(rel->relid,
+							SelfItemPointerAttributeNumber,
+							TIDOID,
+							-1,
+							InvalidOid,
+							0);
+	pathkeys = build_expression_pathkey(root,
+										expr,
+										NULL,
+										TIDLessOperator,
+										rel->relids,
+										true);
+
+	return pathkeys;
 }
 
 /****************************************************************************

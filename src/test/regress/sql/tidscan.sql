@@ -171,3 +171,38 @@ SELECT ctid FROM tidrangescan_empty WHERE ctid < '(1, 0)';
 EXPLAIN (COSTS OFF)
 SELECT ctid FROM tidrangescan_empty WHERE ctid > '(9, 0)';
 SELECT ctid FROM tidrangescan_empty WHERE ctid > '(9, 0)';
+
+-- check that ASC ordering on a tidscan doesn't require a sort
+EXPLAIN (COSTS OFF)
+SELECT ctid FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid;
+SELECT ctid FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid;
+
+-- ASC ordering with no quals should use tid range scan
+EXPLAIN (COSTS OFF)
+SELECT ctid FROM tidrangescan ORDER BY ctid ASC;
+
+-- min/max
+EXPLAIN (COSTS OFF)
+SELECT MIN(ctid) FROM tidrangescan;
+SELECT MIN(ctid) FROM tidrangescan;
+
+EXPLAIN (COSTS OFF)
+SELECT MIN(ctid) FROM tidrangescan WHERE ctid > '(5,0)';
+SELECT MIN(ctid) FROM tidrangescan WHERE ctid > '(5,0)';
+
+-- pathkeys can be usable for merge join?
+
+EXPLAIN SELECT * FROM tidrangescan AS t1
+INNER JOIN tidrangescan AS t2 ON t1.ctid = t2.ctid 
+ORDER BY t1.ctid;
+                                 QUERY PLAN
+-----------------------------------------------------------------------------
+ Merge Join  (cost=0.00..21.25 rows=300 width=14)
+   Merge Cond: (t1.ctid = t2.ctid)
+   ->  Tid Scan Backward on t1  (cost=0.00..8.00 rows=300 width=10)
+   ->  Materialize  (cost=0.00..8.75 rows=300 width=10)
+         ->  Tid Scan Backward on t1 t2  (cost=0.00..8.00 rows=300 width=10)
+(5 rows)
+-- clean up
+DROP TABLE tidscan;
+DROP TABLE tidrangescan;

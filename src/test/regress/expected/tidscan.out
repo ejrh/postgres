@@ -528,3 +528,68 @@ SELECT ctid FROM tidrangescan_empty WHERE ctid > '(9, 0)';
 ------
 (0 rows)
 
+-- check that ASC ordering on a tidscan doesn't require a sort
+EXPLAIN (COSTS OFF)
+SELECT ctid FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid;
+                          QUERY PLAN                           
+---------------------------------------------------------------
+ Tid Scan on tidscan
+   TID Cond: (ctid = ANY ('{"(0,2)","(0,1)","(0,3)"}'::tid[]))
+(2 rows)
+
+SELECT ctid FROM tidscan WHERE ctid = ANY(ARRAY['(0,2)', '(0,1)', '(0,3)']::tid[]) ORDER BY ctid;
+ ctid  
+-------
+ (0,1)
+ (0,2)
+ (0,3)
+(3 rows)
+
+-- ASC ordering with no quals should use tid range scan
+EXPLAIN (COSTS OFF)
+SELECT ctid FROM tidrangescan ORDER BY ctid ASC;
+        QUERY PLAN        
+--------------------------
+ Tid Scan on tidrangescan
+(1 row)
+
+-- min/max
+EXPLAIN (COSTS OFF)
+SELECT MIN(ctid) FROM tidrangescan;
+                 QUERY PLAN                 
+--------------------------------------------
+ Result
+   InitPlan 1 (returns $0)
+     ->  Limit
+           ->  Tid Scan on tidrangescan
+                 Filter: (ctid IS NOT NULL)
+(5 rows)
+
+SELECT MIN(ctid) FROM tidrangescan;
+  min  
+-------
+ (0,1)
+(1 row)
+
+EXPLAIN (COSTS OFF)
+SELECT MIN(ctid) FROM tidrangescan WHERE ctid > '(5,0)';
+                   QUERY PLAN                    
+-------------------------------------------------
+ Result
+   InitPlan 1 (returns $0)
+     ->  Limit
+           ->  Tid Scan on tidrangescan
+                 TID Cond: (ctid > '(5,0)'::tid)
+                 Filter: (ctid IS NOT NULL)
+(6 rows)
+
+SELECT MIN(ctid) FROM tidrangescan WHERE ctid > '(5,0)';
+  min  
+-------
+ (5,1)
+(1 row)
+
+
+-- clean up
+DROP TABLE tidscan;
+DROP TABLE tidrangescan;

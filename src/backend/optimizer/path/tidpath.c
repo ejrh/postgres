@@ -392,7 +392,7 @@ BuildParameterizedTidPaths(PlannerInfo *root, RelOptInfo *rel, List *clauses)
 		required_outer = bms_union(rinfo->required_relids, rel->lateral_relids);
 		required_outer = bms_del_member(required_outer, rel->relid);
 
-		add_path(rel, (Path *) create_tidscan_path(root, rel, tidquals,
+		add_path(rel, (Path *) create_tidscan_path(root, rel, tidquals, NULL,
 												   required_outer));
 	}
 }
@@ -417,6 +417,8 @@ ec_member_matches_ctid(PlannerInfo *root, RelOptInfo *rel,
  * create_tidscan_paths
  *	  Create paths corresponding to direct TID scans of the given rel.
  *
+ *	  Path keys will be set to "CTID ASC".
+ *
  *	  Candidate paths are added to the rel's pathlist (using add_path).
  */
 void
@@ -437,8 +439,10 @@ create_tidscan_paths(PlannerInfo *root, RelOptInfo *rel)
 		 * parameterization due to LATERAL refs in its tlist.
 		 */
 		Relids		required_outer = rel->lateral_relids;
+		List *pathkeys = NIL;
 
 		add_path(rel, (Path *) create_tidscan_path(root, rel, tidquals,
+												   pathkeys,
 												   required_outer));
 	}
 
@@ -468,4 +472,28 @@ create_tidscan_paths(PlannerInfo *root, RelOptInfo *rel)
 	 * join quals, for example.
 	 */
 	BuildParameterizedTidPaths(root, rel, rel->joininfo);
+
+
+#if 0
+	if (tidquals != NIL)
+	{
+		/*
+		 * If TID quals were found, make some path keys.
+		 */
+		pathkeys = build_tidscan_pathkeys(root, rel);
+	}
+	else if (has_useful_pathkeys(root, rel))
+	{
+		/*
+		 * Even if no TID quals were found, a TID scan could still be useful
+		 * for being ordered by CTID.  Make some path keys and check them
+		 * against the query pathkeys to see if this is the case.
+		 */
+		pathkeys = build_tidscan_pathkeys(root, rel);
+		if (!pathkeys_contained_in(pathkeys, root->query_pathkeys))
+		{
+			pathkeys = NIL;
+		}
+	}
+#endif
 }
