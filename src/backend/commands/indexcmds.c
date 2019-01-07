@@ -839,7 +839,7 @@ DefineIndex(Oid relationId,
 	 */
 	if (partitioned && stmt->relation && !stmt->relation->inh)
 	{
-		PartitionDesc	pd = RelationGetPartitionDesc(rel);
+		PartitionDesc pd = RelationGetPartitionDesc(rel);
 
 		if (pd->nparts != 0)
 			flags |= INDEX_CREATE_INVALID;

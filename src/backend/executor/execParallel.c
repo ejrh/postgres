@@ -1033,7 +1033,7 @@ ExecParallelRetrieveInstrumentation(PlanState *planstate,
  */
 static void
 ExecParallelRetrieveJitInstrumentation(PlanState *planstate,
-									   SharedJitInstrumentation *shared_jit)
+									   SharedJitInstrumentation * shared_jit)
 {
 	JitInstrumentation *combined;
 	int			ibytes;
@@ -1060,7 +1060,7 @@ ExecParallelRetrieveJitInstrumentation(PlanState *planstate,
 	 * instrumentation in per-query context.
 	 */
 	ibytes = offsetof(SharedJitInstrumentation, jit_instr)
-			 + mul_size(shared_jit->num_workers, sizeof(JitInstrumentation));
+		+ mul_size(shared_jit->num_workers, sizeof(JitInstrumentation));
 	planstate->worker_jit_instrument =
 		MemoryContextAlloc(planstate->state->es_query_cxt, ibytes);
 
@@ -1135,7 +1135,7 @@ ExecParallelCleanup(ParallelExecutorInfo *pei)
 	/* Accumulate JIT instrumentation, if any. */
 	if (pei->jit_instrumentation)
 		ExecParallelRetrieveJitInstrumentation(pei->planstate,
-											pei->jit_instrumentation);
+											   pei->jit_instrumentation);
 
 	/* Free any serialized parameters. */
 	if (DsaPointerIsValid(pei->param_exec))

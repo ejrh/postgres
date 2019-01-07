@@ -89,7 +89,7 @@ typedef enum CopyInsertMethod
 	CIM_SINGLE,					/* use heap_insert or fdw routine */
 	CIM_MULTI,					/* always use heap_multi_insert */
 	CIM_MULTI_CONDITIONAL		/* use heap_multi_insert only if valid */
-} CopyInsertMethod;
+}			CopyInsertMethod;
 
 /*
  * This struct contains all the state variables used throughout a COPY
@@ -2439,8 +2439,8 @@ CopyFrom(CopyState cstate)
 		if (cstate->rel->rd_rel->relkind == RELKIND_PARTITIONED_TABLE)
 		{
 			ereport(ERROR,
-				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
-					errmsg("cannot perform FREEZE on a partitioned table")));
+					(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+					 errmsg("cannot perform FREEZE on a partitioned table")));
 		}
 
 		/*

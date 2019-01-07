@@ -184,7 +184,7 @@ jit_compile_expr(struct ExprState *state)
 
 /* Aggregate JIT instrumentation information */
 void
-InstrJitAgg(JitInstrumentation *dst, JitInstrumentation *add)
+InstrJitAgg(JitInstrumentation * dst, JitInstrumentation * add)
 {
 	dst->created_functions += add->created_functions;
 	INSTR_TIME_ADD(dst->generation_counter, add->generation_counter);

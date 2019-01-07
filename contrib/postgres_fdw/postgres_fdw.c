@@ -3987,8 +3987,9 @@ apply_returning_filter(PgFdwDirectModifyState *dmstate,
 	ExecStoreVirtualTuple(resultSlot);
 
 	/*
-	 * If we have any system columns to return, materialize a heap tuple in the
-	 * slot from column values set above and install system columns in that tuple.
+	 * If we have any system columns to return, materialize a heap tuple in
+	 * the slot from column values set above and install system columns in
+	 * that tuple.
 	 */
 	if (dmstate->hasSystemCols)
 	{

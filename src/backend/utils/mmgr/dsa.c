@@ -2259,7 +2259,7 @@ static void
 check_for_freed_segments_locked(dsa_area *area)
 {
 	size_t		freed_segment_counter;
-	int		i;
+	int			i;
 
 	Assert(LWLockHeldByMe(DSA_AREA_LOCK(area)));
 	freed_segment_counter = area->control->freed_segment_counter;

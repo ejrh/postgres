@@ -1801,7 +1801,7 @@ agg_retrieve_direct(AggState *aggstate)
 				 * cleared from the slot.
 				 */
 				ExecForceStoreHeapTuple(aggstate->grp_firstTuple,
-								   firstSlot);
+										firstSlot);
 				aggstate->grp_firstTuple = NULL;	/* don't keep two pointers */
 
 				/* set up for first advance_aggregates call */

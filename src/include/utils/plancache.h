@@ -178,7 +178,7 @@ typedef struct CachedExpression
 	List	   *invalItems;		/* other dependencies, as PlanInvalItems */
 	MemoryContext context;		/* context containing this CachedExpression */
 	dlist_node	node;			/* link in global list of CachedExpressions */
-} CachedExpression;
+}			CachedExpression;
 
 
 extern void InitPlanCache(void);
@@ -219,7 +219,7 @@ extern CachedPlan *GetCachedPlan(CachedPlanSource *plansource,
 			  QueryEnvironment *queryEnv);
 extern void ReleaseCachedPlan(CachedPlan *plan, bool useResOwner);
 
-extern CachedExpression *GetCachedExpression(Node *expr);
-extern void FreeCachedExpression(CachedExpression *cexpr);
+extern CachedExpression * GetCachedExpression(Node *expr);
+extern void FreeCachedExpression(CachedExpression * cexpr);
 
 #endif							/* PLANCACHE_H */

@@ -606,7 +606,7 @@ ExecInitHashJoin(HashJoin *node, EState *estate, int eflags)
 	TupleDesc	outerDesc,
 				innerDesc;
 	ListCell   *l;
-	const TupleTableSlotOps *ops;
+	const		TupleTableSlotOps *ops;
 
 	/* check for unsupported flags */
 	Assert(!(eflags & (EXEC_FLAG_BACKWARD | EXEC_FLAG_MARK)));
@@ -747,7 +747,7 @@ ExecInitHashJoin(HashJoin *node, EState *estate, int eflags)
 		rclauses = lappend(rclauses, ExecInitExpr(lsecond(hclause->args),
 												  (PlanState *) hjstate));
 		rhclauses = lappend(rhclauses, ExecInitExpr(lsecond(hclause->args),
-												   innerPlanState(hjstate)));
+													innerPlanState(hjstate)));
 		hoperators = lappend_oid(hoperators, hclause->opno);
 	}
 	hjstate->hj_OuterHashKeys = lclauses;

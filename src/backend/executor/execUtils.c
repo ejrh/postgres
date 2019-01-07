@@ -456,7 +456,7 @@ ExecGetResultType(PlanState *planstate)
 /*
  * ExecGetResultSlotOps - information about node's type of result slot
  */
-const TupleTableSlotOps *
+const		TupleTableSlotOps *
 ExecGetResultSlotOps(PlanState *planstate, bool *isfixed)
 {
 	if (planstate->resultopsset && planstate->resultops)
@@ -642,7 +642,7 @@ ExecAssignScanType(ScanState *scanstate, TupleDesc tupDesc)
 void
 ExecCreateScanSlotFromOuterPlan(EState *estate,
 								ScanState *scanstate,
-								const TupleTableSlotOps *tts_ops)
+								const TupleTableSlotOps * tts_ops)
 {
 	PlanState  *outerPlan;
 	TupleDesc	tupDesc;

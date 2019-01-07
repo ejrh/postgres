@@ -36,7 +36,7 @@
  */
 int
 ScanKeywordLookup(const char *text,
-				  const ScanKeywordList *keywords)
+				  const ScanKeywordList * keywords)
 {
 	int			len,
 				i;

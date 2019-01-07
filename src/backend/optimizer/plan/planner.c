@@ -119,7 +119,7 @@ typedef struct
 	WindowClause *wc;
 	List	   *uniqueOrder;	/* A List of unique ordering/partitioning
 								 * clauses per Window */
-} WindowClauseSortData;
+}			WindowClauseSortData;
 
 /* Local functions */
 static Node *preprocess_expression(PlannerInfo *root, Node *expr, int kind);
@@ -5325,8 +5325,8 @@ select_active_windows(PlannerInfo *root, WindowFuncLists *wflists)
 static int
 common_prefix_cmp(const void *a, const void *b)
 {
-	const WindowClauseSortData *wcsa = a;
-	const WindowClauseSortData *wcsb = b;
+	const		WindowClauseSortData *wcsa = a;
+	const		WindowClauseSortData *wcsb = b;
 	ListCell   *item_a;
 	ListCell   *item_b;
 

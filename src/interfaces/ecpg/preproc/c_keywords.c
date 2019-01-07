@@ -43,7 +43,7 @@ ScanCKeywordLookup(const char *text)
 	const uint16 *low;
 	const uint16 *high;
 
-	if (strlen(text) > ScanCKeywords.max_kw_len)
+	if (strlen(text) >ScanCKeywords.max_kw_len)
 		return -1;				/* too long to be any keyword */
 
 	kw_string = ScanCKeywords.kw_string;

@@ -91,7 +91,7 @@ typedef struct socket_set
 	int			maxfds;			/* allocated length of pollfds[] array */
 	int			curfds;			/* number currently in use */
 	struct pollfd pollfds[FLEXIBLE_ARRAY_MEMBER];
-} socket_set;
+}			socket_set;
 
 #endif							/* POLL_USING_PPOLL */
 
@@ -102,7 +102,7 @@ typedef struct socket_set
 {
 	int			maxfd;			/* largest FD currently set in fds */
 	fd_set		fds;
-} socket_set;
+}			socket_set;
 
 #endif							/* POLL_USING_SELECT */
 
@@ -216,7 +216,7 @@ bool		progress_timestamp = false; /* progress report with Unix time */
 int			nclients = 1;		/* number of clients */
 int			nthreads = 1;		/* number of threads */
 bool		is_connect;			/* establish connection for each transaction */
-bool		report_per_command;	/* report per-command latencies */
+bool		report_per_command; /* report per-command latencies */
 int			main_pid;			/* main process id used in log filename */
 
 char	   *pghost = "";
@@ -285,7 +285,7 @@ typedef struct StatsData
 typedef struct RandomState
 {
 	unsigned short xseed[3];
-} RandomState;
+}			RandomState;
 
 /*
  * Connection state machine states.
@@ -447,11 +447,11 @@ typedef struct
 
 	/*
 	 * Separate randomness for each thread. Each thread option uses its own
-	 * random state to make all of them independent of each other and therefore
-	 * deterministic at the thread level.
+	 * random state to make all of them independent of each other and
+	 * therefore deterministic at the thread level.
 	 */
 	RandomState ts_choose_rs;	/* random state for selecting a script */
-	RandomState ts_throttle_rs;	/* random state for transaction throttling */
+	RandomState ts_throttle_rs; /* random state for transaction throttling */
 	RandomState ts_sample_rs;	/* random state for log sampling */
 
 	int64		throttle_trigger;	/* previous/next throttling (us) */
@@ -591,12 +591,12 @@ static void addScript(ParsedScript script);
 static void *threadRun(void *arg);
 static void finishCon(CState *st);
 static void setalarm(int seconds);
-static socket_set *alloc_socket_set(int count);
-static void free_socket_set(socket_set *sa);
-static void clear_socket_set(socket_set *sa);
-static void add_socket_to_set(socket_set *sa, int fd, int idx);
-static int	wait_on_socket_set(socket_set *sa, int64 usecs);
-static bool socket_has_input(socket_set *sa, int fd, int idx);
+static socket_set * alloc_socket_set(int count);
+static void free_socket_set(socket_set * sa);
+static void clear_socket_set(socket_set * sa);
+static void add_socket_to_set(socket_set * sa, int fd, int idx);
+static int	wait_on_socket_set(socket_set * sa, int64 usecs);
+static bool socket_has_input(socket_set * sa, int fd, int idx);
 
 
 /* callback functions for our flex lexer */
@@ -775,7 +775,7 @@ out_of_range:
 invalid_syntax:
 	if (!errorOK)
 		fprintf(stderr,
-				"invalid input syntax for type bigint: \"%s\"\n",str);
+				"invalid input syntax for type bigint: \"%s\"\n", str);
 	return false;
 }
 
@@ -783,7 +783,7 @@ invalid_syntax:
 bool
 strtodouble(const char *str, bool errorOK, double *dv)
 {
-	char *end;
+	char	   *end;
 
 	errno = 0;
 	*dv = strtod(str, &end);
@@ -800,7 +800,7 @@ strtodouble(const char *str, bool errorOK, double *dv)
 	{
 		if (!errorOK)
 			fprintf(stderr,
-					"invalid input syntax for type double: \"%s\"\n",str);
+					"invalid input syntax for type double: \"%s\"\n", str);
 		return false;
 	}
 	return true;
@@ -810,7 +810,7 @@ strtodouble(const char *str, bool errorOK, double *dv)
  * Initialize a random state struct.
  */
 static void
-initRandomState(RandomState *random_state)
+initRandomState(RandomState * random_state)
 {
 	random_state->xseed[0] = random();
 	random_state->xseed[1] = random();
@@ -819,7 +819,7 @@ initRandomState(RandomState *random_state)
 
 /* random number generator: uniform distribution from min to max inclusive */
 static int64
-getrand(RandomState *random_state, int64 min, int64 max)
+getrand(RandomState * random_state, int64 min, int64 max)
 {
 	/*
 	 * Odd coding is so that min and max have approximately the same chance of
@@ -839,7 +839,7 @@ getrand(RandomState *random_state, int64 min, int64 max)
  * value is exp(-parameter).
  */
 static int64
-getExponentialRand(RandomState *random_state, int64 min, int64 max,
+getExponentialRand(RandomState * random_state, int64 min, int64 max,
 				   double parameter)
 {
 	double		cut,
@@ -863,7 +863,7 @@ getExponentialRand(RandomState *random_state, int64 min, int64 max,
 
 /* random number generator: gaussian distribution from min to max inclusive */
 static int64
-getGaussianRand(RandomState *random_state, int64 min, int64 max,
+getGaussianRand(RandomState * random_state, int64 min, int64 max,
 				double parameter)
 {
 	double		stdev;
@@ -923,7 +923,7 @@ getGaussianRand(RandomState *random_state, int64 min, int64 max,
  * not be one.
  */
 static int64
-getPoissonRand(RandomState *random_state, double center)
+getPoissonRand(RandomState * random_state, double center)
 {
 	/*
 	 * Use inverse transform sampling to generate a value > 0, such that the
@@ -1010,7 +1010,7 @@ zipfFindOrCreateCacheCell(ZipfCache *cache, int64 n, double s)
  * Luc Devroye, p. 550-551, Springer 1986.
  */
 static int64
-computeIterativeZipfian(RandomState *random_state, int64 n, double s)
+computeIterativeZipfian(RandomState * random_state, int64 n, double s)
 {
 	double		b = pow(2.0, s - 1.0);
 	double		x,
@@ -1040,7 +1040,7 @@ computeIterativeZipfian(RandomState *random_state, int64 n, double s)
  * Jim Gray et al, SIGMOD 1994
  */
 static int64
-computeHarmonicZipfian(ZipfCache *zipf_cache, RandomState *random_state,
+computeHarmonicZipfian(ZipfCache *zipf_cache, RandomState * random_state,
 					   int64 n, double s)
 {
 	ZipfCell   *cell = zipfFindOrCreateCacheCell(zipf_cache, n, s);
@@ -1056,7 +1056,7 @@ computeHarmonicZipfian(ZipfCache *zipf_cache, RandomState *random_state,
 
 /* random number generator: zipfian distribution from min to max inclusive */
 static int64
-getZipfianRand(ZipfCache *zipf_cache, RandomState *random_state, int64 min,
+getZipfianRand(ZipfCache *zipf_cache, RandomState * random_state, int64 min,
 			   int64 max, double s)
 {
 	int64		n = max - min + 1;
@@ -1414,7 +1414,7 @@ makeVariableValue(Variable *var)
 	else if (is_an_int(var->svalue))
 	{
 		/* if it looks like an int, it must be an int without overflow */
-		int64 iv;
+		int64		iv;
 
 		if (!strtoint64(var->svalue, false, &iv))
 			return false;
@@ -3191,7 +3191,7 @@ advanceConnectionState(TState *thread, CState *st, StatsData *agg)
 
 					INSTR_TIME_SET_CURRENT_LAZY(now);
 
-					command	= sql_script[st->use_file].commands[st->command];
+					command = sql_script[st->use_file].commands[st->command];
 					/* XXX could use a mutex here, but we choose not to */
 					addToSimpleStats(&command->stats,
 									 INSTR_TIME_GET_DOUBLE(now) -
@@ -3235,9 +3235,8 @@ advanceConnectionState(TState *thread, CState *st, StatsData *agg)
 				st->state = CSTATE_CHOOSE_SCRIPT;
 
 				/*
-				 * Ensure that we always return on this point, so as to
-				 * avoid an infinite loop if the script only contains meta
-				 * commands.
+				 * Ensure that we always return on this point, so as to avoid
+				 * an infinite loop if the script only contains meta commands.
 				 */
 				return;
 
@@ -6206,19 +6205,19 @@ alloc_socket_set(int count)
 }
 
 static void
-free_socket_set(socket_set *sa)
+free_socket_set(socket_set * sa)
 {
 	pg_free(sa);
 }
 
 static void
-clear_socket_set(socket_set *sa)
+clear_socket_set(socket_set * sa)
 {
 	sa->curfds = 0;
 }
 
 static void
-add_socket_to_set(socket_set *sa, int fd, int idx)
+add_socket_to_set(socket_set * sa, int fd, int idx)
 {
 	Assert(idx < sa->maxfds && idx == sa->curfds);
 	sa->pollfds[idx].fd = fd;
@@ -6228,7 +6227,7 @@ add_socket_to_set(socket_set *sa, int fd, int idx)
 }
 
 static int
-wait_on_socket_set(socket_set *sa, int64 usecs)
+wait_on_socket_set(socket_set * sa, int64 usecs)
 {
 	if (usecs > 0)
 	{
@@ -6245,7 +6244,7 @@ wait_on_socket_set(socket_set *sa, int64 usecs)
 }
 
 static bool
-socket_has_input(socket_set *sa, int fd, int idx)
+socket_has_input(socket_set * sa, int fd, int idx)
 {
 	/*
 	 * In some cases, threadRun will apply clear_socket_set and then try to
@@ -6273,20 +6272,20 @@ alloc_socket_set(int count)
 }
 
 static void
-free_socket_set(socket_set *sa)
+free_socket_set(socket_set * sa)
 {
 	pg_free(sa);
 }
 
 static void
-clear_socket_set(socket_set *sa)
+clear_socket_set(socket_set * sa)
 {
 	FD_ZERO(&sa->fds);
 	sa->maxfd = -1;
 }
 
 static void
-add_socket_to_set(socket_set *sa, int fd, int idx)
+add_socket_to_set(socket_set * sa, int fd, int idx)
 {
 	if (fd < 0 || fd >= FD_SETSIZE)
 	{
@@ -6303,7 +6302,7 @@ add_socket_to_set(socket_set *sa, int fd, int idx)
 }
 
 static int
-wait_on_socket_set(socket_set *sa, int64 usecs)
+wait_on_socket_set(socket_set * sa, int64 usecs)
 {
 	if (usecs > 0)
 	{
@@ -6320,7 +6319,7 @@ wait_on_socket_set(socket_set *sa, int64 usecs)
 }
 
 static bool
-socket_has_input(socket_set *sa, int fd, int idx)
+socket_has_input(socket_set * sa, int fd, int idx)
 {
 	return (FD_ISSET(fd, &sa->fds) != 0);
 }

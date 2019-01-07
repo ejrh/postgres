@@ -936,7 +936,7 @@ _outPartitionPruneInfo(StringInfo str, const PartitionPruneInfo *node)
 }
 
 static void
-_outPartitionedRelPruneInfo(StringInfo str, const PartitionedRelPruneInfo *node)
+_outPartitionedRelPruneInfo(StringInfo str, const PartitionedRelPruneInfo * node)
 {
 	WRITE_NODE_TYPE("PARTITIONEDRELPRUNEINFO");
 

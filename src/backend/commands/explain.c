@@ -722,7 +722,7 @@ ExplainPrintJITSummary(ExplainState *es, QueryDesc *queryDesc)
  */
 void
 ExplainPrintJIT(ExplainState *es, int jit_flags,
-				JitInstrumentation *ji, int worker_num)
+				JitInstrumentation * ji, int worker_num)
 {
 	instr_time	total_time;
 	bool		for_workers = (worker_num >= 0);
@@ -1599,7 +1599,7 @@ ExplainNode(PlanState *planstate, List *ancestors,
 				if (es->costs && es->verbose &&
 					outerPlanState(planstate)->worker_jit_instrument)
 				{
-					PlanState *child = outerPlanState(planstate);
+					PlanState  *child = outerPlanState(planstate);
 					int			n;
 					SharedJitInstrumentation *w = child->worker_jit_instrument;
 

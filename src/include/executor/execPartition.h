@@ -47,7 +47,7 @@ typedef struct PartitionRoutingInfo
 	 * is required between root and partition.
 	 */
 	TupleTableSlot *pi_PartitionTupleSlot;
-} PartitionRoutingInfo;
+}			PartitionRoutingInfo;
 
 /*
  * PartitionedRelPruningData - Per-partitioned-table data for run-time pruning
@@ -80,7 +80,7 @@ typedef struct PartitionedRelPruningData
 	List	   *pruning_steps;
 	bool		do_initial_prune;
 	bool		do_exec_prune;
-} PartitionedRelPruningData;
+}			PartitionedRelPruningData;
 
 /*
  * PartitionPruningData - Holds all the run-time pruning information for

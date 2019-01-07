@@ -1115,7 +1115,7 @@ typedef struct PartitionedRelPruneInfo
 	bool		do_exec_prune;	/* true if pruning should be performed during
 								 * executor run. */
 	Bitmapset  *execparamids;	/* All PARAM_EXEC Param IDs in pruning_steps */
-} PartitionedRelPruneInfo;
+}			PartitionedRelPruneInfo;
 
 /*
  * Abstract Node type for partition pruning steps (there are no concrete

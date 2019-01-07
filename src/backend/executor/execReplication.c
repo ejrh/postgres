@@ -170,7 +170,7 @@ retry:
 		HeapUpdateFailureData hufd;
 		HTSU_Result res;
 		HeapTupleData locktup;
-		HeapTupleTableSlot *hslot = (HeapTupleTableSlot *)outslot;
+		HeapTupleTableSlot *hslot = (HeapTupleTableSlot *) outslot;
 
 		/* Only a heap tuple has item pointers. */
 		Assert(TTS_IS_HEAPTUPLE(outslot) || TTS_IS_BUFFERTUPLE(outslot));
@@ -337,7 +337,7 @@ retry:
 		HeapUpdateFailureData hufd;
 		HTSU_Result res;
 		HeapTupleData locktup;
-		HeapTupleTableSlot *hslot = (HeapTupleTableSlot *)outslot;
+		HeapTupleTableSlot *hslot = (HeapTupleTableSlot *) outslot;
 
 		/* Only a heap tuple has item pointers. */
 		Assert(TTS_IS_HEAPTUPLE(outslot) || TTS_IS_BUFFERTUPLE(outslot));
@@ -462,8 +462,8 @@ ExecSimpleRelationUpdate(EState *estate, EPQState *epqstate,
 	HeapTuple	tuple;
 	ResultRelInfo *resultRelInfo = estate->es_result_relation_info;
 	Relation	rel = resultRelInfo->ri_RelationDesc;
-	HeapTupleTableSlot *hsearchslot = (HeapTupleTableSlot *)searchslot;
-	HeapTupleTableSlot *hslot = (HeapTupleTableSlot *)slot;
+	HeapTupleTableSlot *hsearchslot = (HeapTupleTableSlot *) searchslot;
+	HeapTupleTableSlot *hslot = (HeapTupleTableSlot *) slot;
 
 	/* We expect both searchslot and the slot to contain a heap tuple. */
 	Assert(TTS_IS_HEAPTUPLE(searchslot) || TTS_IS_BUFFERTUPLE(searchslot));
@@ -529,7 +529,7 @@ ExecSimpleRelationDelete(EState *estate, EPQState *epqstate,
 	bool		skip_tuple = false;
 	ResultRelInfo *resultRelInfo = estate->es_result_relation_info;
 	Relation	rel = resultRelInfo->ri_RelationDesc;
-	HeapTupleTableSlot *hsearchslot = (HeapTupleTableSlot *)searchslot;
+	HeapTupleTableSlot *hsearchslot = (HeapTupleTableSlot *) searchslot;
 
 	/* For now we support only tables and heap tuples. */
 	Assert(rel->rd_rel->relkind == RELKIND_RELATION);

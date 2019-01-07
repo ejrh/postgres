@@ -25,14 +25,14 @@ typedef struct ScanKeywordList
 	const uint16 *kw_offsets;	/* offsets to the start of each keyword */
 	int			num_keywords;	/* number of keywords */
 	int			max_kw_len;		/* length of longest keyword */
-} ScanKeywordList;
+}			ScanKeywordList;
 
 
-extern int	ScanKeywordLookup(const char *text, const ScanKeywordList *keywords);
+extern int	ScanKeywordLookup(const char *text, const ScanKeywordList * keywords);
 
 /* Code that wants to retrieve the text of the N'th keyword should use this. */
 static inline const char *
-GetScanKeyword(int n, const ScanKeywordList *keywords)
+GetScanKeyword(int n, const ScanKeywordList * keywords)
 {
 	return keywords->kw_string + keywords->kw_offsets[n];
 }

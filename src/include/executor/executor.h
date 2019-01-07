@@ -242,7 +242,7 @@ extern List *ExecInitExprList(List *nodes, PlanState *parent);
 extern ExprState *ExecBuildAggTrans(AggState *aggstate, struct AggStatePerPhaseData *phase,
 				  bool doSort, bool doHash);
 extern ExprState *ExecBuildGroupingEqual(TupleDesc ldesc, TupleDesc rdesc,
-					   const TupleTableSlotOps *lops, const TupleTableSlotOps *rops,
+					   const TupleTableSlotOps * lops, const TupleTableSlotOps * rops,
 					   int numCols,
 					   const AttrNumber *keyColIdx,
 					   const Oid *eqfunctions,
@@ -425,17 +425,17 @@ extern void ExecScanReScan(ScanState *node);
  */
 extern void ExecInitResultTypeTL(PlanState *planstate);
 extern void ExecInitResultSlot(PlanState *planstate,
-							   const TupleTableSlotOps *tts_ops);
+				   const TupleTableSlotOps * tts_ops);
 extern void ExecInitResultTupleSlotTL(PlanState *planstate,
-									  const TupleTableSlotOps *tts_ops);
+						  const TupleTableSlotOps * tts_ops);
 extern void ExecInitScanTupleSlot(EState *estate, ScanState *scanstate,
-								  TupleDesc tupleDesc,
-								  const TupleTableSlotOps *tts_ops);
+					  TupleDesc tupleDesc,
+					  const TupleTableSlotOps * tts_ops);
 extern TupleTableSlot *ExecInitExtraTupleSlot(EState *estate,
 					   TupleDesc tupledesc,
-					   const TupleTableSlotOps *tts_ops);
+					   const TupleTableSlotOps * tts_ops);
 extern TupleTableSlot *ExecInitNullTupleSlot(EState *estate, TupleDesc tupType,
-					  const TupleTableSlotOps *tts_ops);
+					  const TupleTableSlotOps * tts_ops);
 extern TupleDesc ExecTypeFromTL(List *targetList);
 extern TupleDesc ExecCleanTypeFromTL(List *targetList);
 extern TupleDesc ExecTypeFromExprList(List *exprList);
@@ -450,7 +450,7 @@ typedef struct TupOutputState
 
 extern TupOutputState *begin_tup_output_tupdesc(DestReceiver *dest,
 						 TupleDesc tupdesc,
-						 const TupleTableSlotOps *tts_ops);
+						 const TupleTableSlotOps * tts_ops);
 extern void do_tup_output(TupOutputState *tstate, Datum *values, bool *isnull);
 extern void do_text_output_multiline(TupOutputState *tstate, const char *txt);
 extern void end_tup_output(TupOutputState *tstate);
@@ -506,7 +506,7 @@ extern void ExecAssignExprContext(EState *estate, PlanState *planstate);
 extern TupleDesc ExecGetResultType(PlanState *planstate);
 extern TupleTableSlot ExecGetResultSlot(PlanState *planstate);
 extern const TupleTableSlotOps *ExecGetResultSlotOps(PlanState *planstate,
-													 bool *isfixed);
+					 bool *isfixed);
 extern void ExecAssignProjectionInfo(PlanState *planstate,
 						 TupleDesc inputDesc);
 extern void ExecConditionalAssignProjectionInfo(PlanState *planstate,
@@ -515,7 +515,7 @@ extern void ExecFreeExprContext(PlanState *planstate);
 extern void ExecAssignScanType(ScanState *scanstate, TupleDesc tupDesc);
 extern void ExecCreateScanSlotFromOuterPlan(EState *estate,
 								ScanState *scanstate,
-								const TupleTableSlotOps *tts_ops);
+								const TupleTableSlotOps * tts_ops);
 
 extern bool ExecRelationIsTargetRelation(EState *estate, Index scanrelid);
 

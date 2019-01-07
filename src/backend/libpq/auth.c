@@ -2365,8 +2365,8 @@ InitializeLDAPConnection(Port *port, LDAP **ldap)
 		char	   *uris = NULL;
 
 		/*
-		 * We have a space-separated list of hostnames.  Convert it
-		 * to a space-separated list of URIs.
+		 * We have a space-separated list of hostnames.  Convert it to a
+		 * space-separated list of URIs.
 		 */
 		do
 		{

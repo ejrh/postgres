@@ -162,7 +162,7 @@ GroupState *
 ExecInitGroup(Group *node, EState *estate, int eflags)
 {
 	GroupState *grpstate;
-	const TupleTableSlotOps *tts_ops;
+	const		TupleTableSlotOps *tts_ops;
 
 	/* check for unsupported flags */
 	Assert(!(eflags & (EXEC_FLAG_BACKWARD | EXEC_FLAG_MARK)));

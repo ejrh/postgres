@@ -4203,6 +4203,7 @@ ATExecCmd(List **wqueue, AlteredTableInfo *tab, Relation rel,
 			/* nothing to do here, oid columns don't exist anymore */
 			break;
 		case AT_SetTableSpace:	/* SET TABLESPACE */
+
 			/*
 			 * Only do this for partitioned tables and indexes, for which this
 			 * is just a catalog change.  Other relation types which have
@@ -11000,16 +11001,16 @@ ATExecSetTableSpaceNoStorage(Relation rel, Oid newTableSpace)
 	Oid			reloid = RelationGetRelid(rel);
 
 	/*
-	 * Shouldn't be called on relations having storage; these are processed
-	 * in phase 3.
+	 * Shouldn't be called on relations having storage; these are processed in
+	 * phase 3.
 	 */
 	Assert(!RELKIND_HAS_STORAGE(rel->rd_rel->relkind));
 
 	/* Can't allow a non-shared relation in pg_global */
 	if (newTableSpace == GLOBALTABLESPACE_OID)
 		ereport(ERROR,
-		(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-			errmsg("only shared relations can be placed in pg_global tablespace")));
+				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
+				 errmsg("only shared relations can be placed in pg_global tablespace")));
 
 	/*
 	 * No work if no change in tablespace.

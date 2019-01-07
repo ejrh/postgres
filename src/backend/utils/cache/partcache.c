@@ -361,7 +361,7 @@ RelationBuildPartitionDesc(Relation rel)
 		partdesc->oids[index] = oids[i];
 		/* Record if the partition is a leaf partition */
 		partdesc->is_leaf[index] =
-				(get_rel_relkind(oids[i]) != RELKIND_PARTITIONED_TABLE);
+			(get_rel_relkind(oids[i]) != RELKIND_PARTITIONED_TABLE);
 	}
 	MemoryContextSwitchTo(oldcxt);
 

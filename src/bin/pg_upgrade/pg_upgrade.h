@@ -306,7 +306,7 @@ typedef struct
 {
 	char	   *name;
 	int			dbnum;
-} LibraryInfo;
+}			LibraryInfo;
 
 /*
  * OSInfo
