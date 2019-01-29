@@ -133,6 +133,7 @@ test: misc_functions
 test: sysviews
 test: tsrf
 test: tidscan
+test: tidrangescan
 test: collate.icu.utf8
 test: rules
 test: psql
