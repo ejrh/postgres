@@ -172,6 +172,16 @@ EXPLAIN (COSTS OFF)
 SELECT MAX(ctid) FROM tidrangescan WHERE ctid < '(5,0)';
 SELECT MAX(ctid) FROM tidrangescan WHERE ctid < '(5,0)';
 
+-- cursors
+BEGIN;
+DECLARE c CURSOR FOR SELECT ctid FROM tidrangescan WHERE ctid < '(1,0)';
+FETCH NEXT c;
+FETCH NEXT c;
+FETCH PRIOR c;
+FETCH FIRST c;
+FETCH LAST c;
+COMMIT;
+
 -- clean up
 DROP TABLE tidscan;
 DROP TABLE tidrangescan;
