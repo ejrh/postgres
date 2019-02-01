@@ -859,6 +859,7 @@ ExplainPreScanNode(PlanState *planstate, Bitmapset **rels_used)
 		case T_IndexOnlyScan:
 		case T_BitmapHeapScan:
 		case T_TidScan:
+		case T_TidRangeScan:
 		case T_SubqueryScan:
 		case T_FunctionScan:
 		case T_TableFuncScan:
@@ -1004,6 +1005,9 @@ ExplainNode(PlanState *planstate, List *ancestors,
 			break;
 		case T_TidScan:
 			pname = sname = "Tid Scan";
+			break;
+		case T_TidRangeScan:
+			pname = sname = "Tid Range Scan";
 			break;
 		case T_SubqueryScan:
 			pname = sname = "Subquery Scan";
@@ -1190,22 +1194,25 @@ ExplainNode(PlanState *planstate, List *ancestors,
 		ExplainPropertyBool("Parallel Aware", plan->parallel_aware, es);
 	}
 
-	switch (nodeTag(plan))
-	{
-		case T_SeqScan:
-		case T_SampleScan:
-		case T_BitmapHeapScan:
-		case T_SubqueryScan:
-		case T_FunctionScan:
-		case T_TableFuncScan:
-		case T_ValuesScan:
-		case T_CteScan:
-		case T_WorkTableScan:
-			ExplainScanTarget((Scan *) plan, es);
-			break;
-		case T_TidScan:
-			show_scan_direction(es, ((TidScan *) plan)->direction);
-			ExplainScanTarget((Scan *) plan, es);
+	switch (nodeTag(plan)) {
+        case T_SeqScan:
+        case T_SampleScan:
+        case T_BitmapHeapScan:
+        case T_SubqueryScan:
+        case T_FunctionScan:
+        case T_TableFuncScan:
+        case T_ValuesScan:
+        case T_CteScan:
+        case T_WorkTableScan:
+            ExplainScanTarget((Scan *) plan, es);
+            break;
+        case T_TidScan:
+        case T_TidRangeScan:
+			{
+				ScanDirection dir = IsA(plan, TidScan) ? ((TidScan *) plan)->direction : ((TidRangeScan *) plan)->direction;
+				show_scan_direction(es, dir);
+				ExplainScanTarget((Scan *) plan, es);
+			}
 			break;
 		case T_ForeignScan:
 		case T_CustomScan:
@@ -1594,6 +1601,16 @@ ExplainNode(PlanState *planstate, List *ancestors,
 
 				if (list_length(tidquals) > 1)
 					tidquals = list_make1(make_orclause(tidquals));
+				show_scan_qual(tidquals, "TID Cond", planstate, ancestors, es);
+				show_scan_qual(plan->qual, "Filter", planstate, ancestors, es);
+				if (plan->qual)
+					show_instrumentation_count("Rows Removed by Filter", 1,
+											   planstate, es);
+			}
+			break;
+		case T_TidRangeScan:
+			{
+				List	   *tidquals = ((TidRangeScan *) plan)->tidquals;
 				show_scan_qual(tidquals, "TID Cond", planstate, ancestors, es);
 				show_scan_qual(plan->qual, "Filter", planstate, ancestors, es);
 				if (plan->qual)
@@ -2898,6 +2915,7 @@ ExplainTargetRel(Plan *plan, Index rti, ExplainState *es)
 		case T_IndexOnlyScan:
 		case T_BitmapHeapScan:
 		case T_TidScan:
+		case T_TidRangeScan:
 		case T_ForeignScan:
 		case T_CustomScan:
 		case T_ModifyTable:

@@ -8219,3 +8219,27 @@ brincostestimate(PlannerInfo *root, IndexPath *path, double loop_count,
 
 	*indexPages = index->pages;
 }
+
+static BlockNumber
+get_block_number_from_tid_qual(Expr *qual, BlockNumber default_when_missing)
+{
+	if (qual && IsA(qual, Const)) {
+		Const *con = (Const *) qual;
+		ItemPointer itemptr = (ItemPointer) DatumGetPointer(con->constvalue);
+		return ItemPointerGetBlockNumberNoCheck(itemptr);
+	}
+	else
+	{
+		return default_when_missing;
+	}
+}
+
+double
+tid_range_selectivity(RelOptInfo *rel, Expr *lower_qual, Expr *upper_qual)
+{
+	BlockNumber lower_block = get_block_number_from_tid_qual(lower_qual, 0);
+	BlockNumber upper_block = get_block_number_from_tid_qual(upper_qual, rel->pages);
+
+	double selectivity = (upper_block - lower_block) / ((double) rel->pages + 1);
+	return Max(0.0, Min(1.0, selectivity));
+}

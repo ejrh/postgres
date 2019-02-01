@@ -125,8 +125,8 @@ static Plan *create_bitmap_subplan(PlannerInfo *root, Path *bitmapqual,
 					  List **qual, List **indexqual, List **indexECs);
 static void bitmap_subplan_mark_shared(Plan *plan);
 static List *flatten_partitioned_rels(List *partitioned_rels);
-static TidScan *create_tidscan_plan(PlannerInfo *root, TidPath *best_path,
-					List *tlist, List *scan_clauses);
+static Scan *create_tidscan_plan(PlannerInfo *root, TidPath *best_path,
+						 List *tlist, List *scan_clauses);
 static SubqueryScan *create_subqueryscan_plan(PlannerInfo *root,
 						 SubqueryScanPath *best_path,
 						 List *tlist, List *scan_clauses);
@@ -186,6 +186,8 @@ static BitmapHeapScan *make_bitmap_heapscan(List *qptlist,
 					 Index scanrelid);
 static TidScan *make_tidscan(List *qptlist, List *qpqual, Index scanrelid,
 			 List *tidquals, ScanDirection direction);
+static TidRangeScan *make_tidrangescan(List *qptlist, List *qpqual, Index scanrelid,
+			 List *tidquals, Expr *lower_bound, Expr *upper_bound, bool lower_strict, bool upper_strict, ScanDirection direction);
 static SubqueryScan *make_subqueryscan(List *qptlist,
 				  List *qpqual,
 				  Index scanrelid,
@@ -371,6 +373,7 @@ create_plan_recurse(PlannerInfo *root, Path *best_path, int flags)
 		case T_IndexOnlyScan:
 		case T_BitmapHeapScan:
 		case T_TidScan:
+		case T_TidRangeScan:
 		case T_SubqueryScan:
 		case T_FunctionScan:
 		case T_TableFuncScan:
@@ -648,6 +651,7 @@ create_scan_plan(PlannerInfo *root, Path *best_path, int flags)
 			break;
 
 		case T_TidScan:
+		case T_TidRangeScan:
 			plan = (Plan *) create_tidscan_plan(root,
 												(TidPath *) best_path,
 												tlist,
@@ -3057,11 +3061,11 @@ create_bitmap_subplan(PlannerInfo *root, Path *bitmapqual,
  *	 Returns a tidscan plan for the base relation scanned by 'best_path'
  *	 with restriction clauses 'scan_clauses' and targetlist 'tlist'.
  */
-static TidScan *
+static Scan *
 create_tidscan_plan(PlannerInfo *root, TidPath *best_path,
 					List *tlist, List *scan_clauses)
 {
-	TidScan    *scan_plan;
+	Scan	   *scan_plan;
 	Index		scan_relid = best_path->path.parent->relid;
 	List	   *tidquals = best_path->tidquals;
 	List	   *ortidquals;
@@ -3090,18 +3094,34 @@ create_tidscan_plan(PlannerInfo *root, TidPath *best_path,
 	 * tidquals list has implicit OR semantics.
 	 */
 	ortidquals = tidquals;
-	if (list_length(ortidquals) > 1)
+	if (best_path->method == TID_PATH_LIST && list_length(ortidquals) > 1)
 		ortidquals = list_make1(make_orclause(ortidquals));
 	scan_clauses = list_difference(scan_clauses, ortidquals);
 
-	scan_plan = make_tidscan(tlist,
-							 scan_clauses,
-							 scan_relid,
-							 tidquals,
-							 best_path->direction
-							);
+	if (best_path->method == TID_PATH_LIST)
+	{
+        scan_plan = make_tidscan(tlist,
+                                 scan_clauses,
+                                 scan_relid,
+                                 tidquals,
+                                 best_path->direction
+        );
+	}
+	else
+	{
+		scan_plan = (Scan *) make_tidrangescan(tlist,
+											   scan_clauses,
+											   scan_relid,
+											   tidquals,
+											   best_path->lower_bound,
+											   best_path->upper_bound,
+											   best_path->lower_strict,
+											   best_path->upper_strict,
+											   best_path->direction
+  											);
+	}
 
-	copy_generic_path_info(&scan_plan->scan.plan, &best_path->path);
+	copy_generic_path_info(&scan_plan->plan, &best_path->path);
 
 	return scan_plan;
 }
@@ -5193,6 +5213,36 @@ make_tidscan(List *qptlist,
 	plan->righttree = NULL;
 	node->scan.scanrelid = scanrelid;
 	node->tidquals = tidquals;
+	node->direction = direction;
+
+	return node;
+}
+
+static TidRangeScan *
+make_tidrangescan(List *qptlist,
+				  List *qpqual,
+				  Index scanrelid,
+				  List *tidquals,
+				  Expr *lower_bound,
+				  Expr *upper_bound,
+				  bool lower_strict,
+				  bool upper_strict,
+				  ScanDirection direction
+				 )
+{
+	TidRangeScan    *node = makeNode(TidRangeScan);
+	Plan	   *plan = &node->scan.plan;
+
+	plan->targetlist = qptlist;
+	plan->qual = qpqual;
+	plan->lefttree = NULL;
+	plan->righttree = NULL;
+	node->scan.scanrelid = scanrelid;
+	node->tidquals = tidquals;
+	node->lower_bound = lower_bound;
+	node->upper_bound = upper_bound;
+	node->lower_strict = lower_strict;
+	node->upper_strict = upper_strict;
 	node->direction = direction;
 
 	return node;

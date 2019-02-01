@@ -44,34 +44,43 @@
 #include "optimizer/pathnode.h"
 #include "optimizer/paths.h"
 #include "optimizer/restrictinfo.h"
+#include "nodes/makefuncs.h"
 
 
-static bool IsTidEqualClause(OpExpr *node, int varno);
 static bool IsTidEqualAnyClause(ScalarArrayOpExpr *node, int varno);
 static List *TidQualFromExpr(Node *expr, int varno);
-static List *TidQualFromBaseRestrictinfo(RelOptInfo *rel);
+static List *TidQualFromBaseRestrictinfo(RelOptInfo *rel, TidPathMethod *method, Expr **lower_bound, Expr **upper_bound, bool *lower_strict, bool *upper_strict);
 
+
+static bool IsTidVar(Var *var, int varno)
+{
+	return (var->varattno == SelfItemPointerAttributeNumber &&
+			var->vartype == TIDOID &&
+			var->varno == varno &&
+			var->varlevelsup == 0);
+}
 
 /*
  * Check to see if an opclause is of the form
- *		CTID = pseudoconstant
+ *		CTID OP pseudoconstant
  * or
- *		pseudoconstant = CTID
+ *		pseudoconstant OP CTID
+ * where OP is the expected comparison operator.
  *
  * We check that the CTID Var belongs to relation "varno".  That is probably
  * redundant considering this is only applied to restriction clauses, but
  * let's be safe.
  */
 static bool
-IsTidEqualClause(OpExpr *node, int varno)
+IsTidComparison(OpExpr *node, int varno, Oid expected_comparison_operator)
 {
 	Node	   *arg1,
 			   *arg2,
 			   *other;
 	Var		   *var;
 
-	/* Operator must be tideq */
-	if (node->opno != TIDEqualOperator)
+	/* Operator must be the expected one */
+	if (node->opno != expected_comparison_operator)
 		return false;
 	if (list_length(node->args) != 2)
 		return false;
@@ -109,6 +118,14 @@ IsTidEqualClause(OpExpr *node, int varno)
 
 	return true;				/* success */
 }
+
+
+#define IsTidEqualClause(node, varno)	IsTidComparison(node, varno, TIDEqualOperator)
+#define IsTidLTClause(node, varno)	IsTidComparison(node, varno, TIDLessOperator)
+#define IsTidLEClause(node, varno)	IsTidComparison(node, varno, TIDLessEqOperator)
+#define IsTidGTClause(node, varno)	IsTidComparison(node, varno, TIDGreaterOperator)
+#define IsTidGEClause(node, varno)	IsTidComparison(node, varno, TIDGreaterEqOperator)
+
 
 /*
  * Check to see if a clause is of the form
@@ -216,14 +233,60 @@ TidQualFromExpr(Node *expr, int varno)
 	return rlst;
 }
 
+static Node *
+TidRangeQualFromExpr(Node *expr, int varno, bool want_lower_bound, Expr **bound, bool *strict)
+{
+	if (is_opclause(expr))
+	{
+		if (IsTidLTClause((OpExpr *) expr, varno) || IsTidLEClause((OpExpr *) expr, varno) ||
+			(IsTidGTClause((OpExpr *) expr, varno) || IsTidGEClause((OpExpr *) expr, varno)))
+		{
+			bool is_lower_bound = IsTidGTClause((OpExpr *) expr, varno) || IsTidGEClause((OpExpr *) expr, varno);
+
+			Node *rightop = get_rightop((Expr *) expr);
+			Node *leftop = get_leftop((Expr *) expr);
+			Node *value = rightop;
+
+			if (!IsA(leftop, Var) || !IsTidVar((Var *) leftop, varno))
+			{
+				is_lower_bound = !is_lower_bound;
+				value = leftop;
+			}
+
+			if (is_lower_bound == want_lower_bound)
+			{
+				*strict = IsTidGTClause((OpExpr *) expr, varno) || IsTidLTClause((OpExpr *) expr, varno);
+				*bound = (Expr *) value;
+				return expr;
+			}
+		}
+	}
+
+	return NULL;
+}
+
+static List *
+MakeTidRangeQuals(Node *lower_bound_expr, Node *upper_bound_expr)
+{
+	if (lower_bound_expr && !upper_bound_expr)
+		return list_make1(lower_bound_expr);
+	else if (!lower_bound_expr && upper_bound_expr)
+		return list_make1(upper_bound_expr);
+	else
+		return list_make2(lower_bound_expr, upper_bound_expr);
+}
+
 /*
  *	Extract a set of CTID conditions from the rel's baserestrictinfo list
  */
 static List *
-TidQualFromBaseRestrictinfo(RelOptInfo *rel)
+TidQualFromBaseRestrictinfo(RelOptInfo *rel, TidPathMethod *method,
+							Expr **lower_bound, Expr **upper_bound, bool *lower_strict, bool *upper_strict)
 {
 	List	   *rlst = NIL;
 	ListCell   *l;
+	Node *lower_bound_expr = NULL;
+	Node *upper_bound_expr = NULL;
 
 	foreach(l, rel->baserestrictinfo)
 	{
@@ -236,12 +299,36 @@ TidQualFromBaseRestrictinfo(RelOptInfo *rel)
 		if (!restriction_is_securely_promotable(rinfo, rel))
 			continue;
 
+		/*
+		 * Check if this clause contains a range qual
+		 */
+		if (!lower_bound_expr)
+			lower_bound_expr = TidRangeQualFromExpr((Node *) rinfo->clause, rel->relid, true, lower_bound, lower_strict);
+
+		if (!upper_bound_expr)
+			upper_bound_expr = TidRangeQualFromExpr((Node *) rinfo->clause, rel->relid, false, upper_bound, upper_strict);
+
 		rlst = TidQualFromExpr((Node *) rinfo->clause, rel->relid);
 		if (rlst)
 			break;
 	}
+
+	/*
+	 * If one or both range quals was specified, and there were no equality/in/current-of quals, use them.
+	 */
+	if (!rlst && (lower_bound_expr || upper_bound_expr))
+	{
+		rlst = MakeTidRangeQuals(lower_bound_expr, upper_bound_expr);
+		*method = TID_PATH_RANGE;
+	}
+	else if (rlst)
+	{
+		*method = TID_PATH_LIST;
+	}
+
 	return rlst;
 }
+
 
 /*
  * create_tidscan_paths
@@ -254,8 +341,15 @@ TidQualFromBaseRestrictinfo(RelOptInfo *rel)
 void
 create_tidscan_paths(PlannerInfo *root, RelOptInfo *rel)
 {
-	Relids		required_outer;
-	List	   *tidquals;
+	Relids		   required_outer;
+	List		  *tidquals;
+	TidPathMethod  method = TID_PATH_RANGE;
+	Expr		  *lower_bound = NULL;
+	Expr		  *upper_bound = NULL;
+	bool		   lower_strict = false;
+	bool		   upper_strict = false;
+	List			*pathkeys = NULL;
+	ScanDirection	 direction = ForwardScanDirection;
 
 	/*
 	 * We don't support pushing join clauses into the quals of a tidscan, but
@@ -264,33 +358,42 @@ create_tidscan_paths(PlannerInfo *root, RelOptInfo *rel)
 	 */
 	required_outer = rel->lateral_relids;
 
-	tidquals = TidQualFromBaseRestrictinfo(rel);
+	tidquals = TidQualFromBaseRestrictinfo(rel, &method, &lower_bound, &upper_bound, &lower_strict, &upper_strict);
 
-	if (tidquals)
+	/*
+	 * Try to determine the best scan direction and create some useful pathkeys.
+	 */
+	if (has_useful_pathkeys(root, rel))
 	{
-		List			*pathkeys = NULL;
-		ScanDirection	 direction = ForwardScanDirection;
-
-		if (has_useful_pathkeys(root, rel)) {
-			/*
-			 * Build path keys corresponding to ORDER BY ctid ASC, and check
-			 * whether they will be useful for this scan.  If not, build
-			 * path keys for DESC, and try that; set the direction to
-			 * BackwardScanDirection if so.  If neither of them will be
-			 * useful, no path keys will be set.
-			 */
-			pathkeys = build_tidscan_pathkeys(root, rel, ForwardScanDirection);
-			if (!pathkeys_contained_in(pathkeys, root->query_pathkeys))
-			{
-				pathkeys = build_tidscan_pathkeys(root, rel, BackwardScanDirection);
-				if (pathkeys_contained_in(pathkeys, root->query_pathkeys))
-					direction = BackwardScanDirection;
-				else
-					pathkeys = NULL;
-			}
+		/*
+		 * Build path keys corresponding to ORDER BY ctid ASC, and check
+		 * whether they will be useful for this scan.  If not, build
+		 * path keys for DESC, and try that; set the direction to
+		 * BackwardScanDirection if so.  If neither of them will be
+		 * useful, no path keys will be set.
+		 */
+		pathkeys = build_tidscan_pathkeys(root, rel, ForwardScanDirection);
+		if (!pathkeys_contained_in(pathkeys, root->query_pathkeys))
+		{
+			pathkeys = build_tidscan_pathkeys(root, rel, BackwardScanDirection);
+			if (pathkeys_contained_in(pathkeys, root->query_pathkeys))
+				direction = BackwardScanDirection;
+			else
+				pathkeys = NULL;
 		}
+	}
 
-		add_path(rel, (Path *) create_tidscan_path(root, rel, tidquals, pathkeys, direction,
-												   required_outer));
+	/*
+	 * If there are tidquals or some useful pathkeys were found, then it's
+	 * worth generating a tidscan path.
+	 */
+	if (tidquals || pathkeys)
+	{
+		/* If we don't have any tidquals, then we MUST create a tid range scan path. */
+		Assert(tidquals || method == TID_PATH_RANGE);
+
+		add_path(rel, (Path *) create_tidscan_path(root, rel, tidquals,
+												   method, lower_bound, upper_bound, lower_strict, upper_strict,
+												   required_outer, direction, pathkeys));
 	}
 }

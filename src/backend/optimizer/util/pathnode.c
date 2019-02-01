@@ -1186,12 +1186,12 @@ create_bitmap_or_path(PlannerInfo *root,
  */
 TidPath *
 create_tidscan_path(PlannerInfo *root, RelOptInfo *rel, List *tidquals,
-					List *pathkeys, ScanDirection direction,
-					Relids required_outer)
+					TidPathMethod method, Expr *lower_bound, Expr *upper_bound, bool lower_strict, bool upper_strict,
+					Relids required_outer, ScanDirection direction, List *pathkeys)
 {
 	TidPath    *pathnode = makeNode(TidPath);
 
-	pathnode->path.pathtype = T_TidScan;
+	pathnode->path.pathtype = (method == TID_PATH_LIST) ? T_TidScan : T_TidRangeScan;
 	pathnode->path.parent = rel;
 	pathnode->path.pathtarget = rel->reltarget;
 	pathnode->path.param_info = get_baserel_parampathinfo(root, rel,
@@ -1202,9 +1202,14 @@ create_tidscan_path(PlannerInfo *root, RelOptInfo *rel, List *tidquals,
 	pathnode->path.pathkeys = pathkeys;
 
 	pathnode->tidquals = tidquals;
+	pathnode->method = method;
+	pathnode->lower_bound = lower_bound;
+	pathnode->upper_bound = upper_bound;
+	pathnode->lower_strict = lower_strict;
+	pathnode->upper_strict = upper_strict;
 	pathnode->direction = direction;
 
-	cost_tidscan(&pathnode->path, root, rel, tidquals,
+	cost_tidscan(&pathnode->path, root, rel, tidquals, method, lower_bound, upper_bound,
 				 pathnode->path.param_info);
 
 	return pathnode;

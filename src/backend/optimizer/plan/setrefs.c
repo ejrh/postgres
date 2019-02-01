@@ -537,6 +537,21 @@ set_plan_refs(PlannerInfo *root, Plan *plan, int rtoffset)
 					fix_scan_list(root, splan->tidquals, rtoffset);
 			}
 			break;
+		case T_TidRangeScan:
+			{
+				TidRangeScan    *splan = (TidRangeScan *) plan;
+
+				splan->scan.scanrelid += rtoffset;
+				splan->scan.plan.targetlist =
+					fix_scan_list(root, splan->scan.plan.targetlist, rtoffset);
+				splan->scan.plan.qual =
+					fix_scan_list(root, splan->scan.plan.qual, rtoffset);
+				splan->lower_bound =
+					(OpExpr *) fix_scan_expr(root, (Node *) splan->lower_bound, rtoffset);
+				splan->upper_bound =
+					(OpExpr *) fix_scan_expr(root, (Node *) splan->upper_bound, rtoffset);
+			}
+			break;
 		case T_SubqueryScan:
 			/* Needs special treatment, see comments below */
 			return set_subqueryscan_references(root,

@@ -1491,6 +1491,18 @@ typedef struct TidScanState
 	HeapTupleData tss_htup;
 } TidScanState;
 
+typedef struct TidRangeScanState
+{
+	ScanState		 ss;				/* its first field is NodeTag */
+	ExprState		*lower_expr;
+	ExprState		*upper_expr;
+	BlockNumber		 first_block;
+	OffsetNumber	 first_tuple;
+	BlockNumber		 last_block;
+	OffsetNumber	 last_tuple;
+	BlockNumber		 blocks_to_scan;
+} TidRangeScanState;
+
 /* ----------------
  *	 SubqueryScanState information
  *
