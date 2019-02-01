@@ -1237,6 +1237,7 @@ typedef struct TidPath
 {
 	Path		path;
 	List	   *tidquals;		/* qual(s) involving CTID = something */
+	ScanDirection direction;
 } TidPath;
 
 /*

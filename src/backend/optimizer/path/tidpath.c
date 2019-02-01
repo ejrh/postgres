@@ -247,6 +247,8 @@ TidQualFromBaseRestrictinfo(RelOptInfo *rel)
  * create_tidscan_paths
  *	  Create paths corresponding to direct TID scans of the given rel.
  *
+ *	  Path keys and direction will be set on the scans if it looks useful.
+ *
  *	  Candidate paths are added to the rel's pathlist (using add_path).
  */
 void
@@ -265,6 +267,30 @@ create_tidscan_paths(PlannerInfo *root, RelOptInfo *rel)
 	tidquals = TidQualFromBaseRestrictinfo(rel);
 
 	if (tidquals)
-		add_path(rel, (Path *) create_tidscan_path(root, rel, tidquals,
+	{
+		List			*pathkeys = NULL;
+		ScanDirection	 direction = ForwardScanDirection;
+
+		if (has_useful_pathkeys(root, rel)) {
+			/*
+			 * Build path keys corresponding to ORDER BY ctid ASC, and check
+			 * whether they will be useful for this scan.  If not, build
+			 * path keys for DESC, and try that; set the direction to
+			 * BackwardScanDirection if so.  If neither of them will be
+			 * useful, no path keys will be set.
+			 */
+			pathkeys = build_tidscan_pathkeys(root, rel, ForwardScanDirection);
+			if (!pathkeys_contained_in(pathkeys, root->query_pathkeys))
+			{
+				pathkeys = build_tidscan_pathkeys(root, rel, BackwardScanDirection);
+				if (pathkeys_contained_in(pathkeys, root->query_pathkeys))
+					direction = BackwardScanDirection;
+				else
+					pathkeys = NULL;
+			}
+		}
+
+		add_path(rel, (Path *) create_tidscan_path(root, rel, tidquals, pathkeys, direction,
 												   required_outer));
+	}
 }
