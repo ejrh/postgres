@@ -456,7 +456,7 @@ static void get_tablesample_def(TableSampleClause *tablesample,
 static void get_opclass_name(Oid opclass, Oid actual_datatype,
 				 StringInfo buf);
 static Node *processIndirection(Node *node, deparse_context *context);
-static void printSubscripts(SubscriptingRef *sbsref, deparse_context *context);
+static void printSubscripts(SubscriptingRef * sbsref, deparse_context *context);
 static char *get_relation_name(Oid relid);
 static char *generate_relation_name(Oid relid, List *namespaces);
 static char *generate_qualified_relation_name(Oid relid);
@@ -10539,7 +10539,7 @@ processIndirection(Node *node, deparse_context *context)
 }
 
 static void
-printSubscripts(SubscriptingRef *sbsref, deparse_context *context)
+printSubscripts(SubscriptingRef * sbsref, deparse_context *context)
 {
 	StringInfo	buf = context->buf;
 	ListCell   *lowlist_item;

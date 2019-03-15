@@ -90,7 +90,7 @@ extern PsqlScanResult psql_scan(PsqlScanState state,
 
 extern void psql_scan_reset(PsqlScanState state);
 
-extern int psql_scan_get_escaped_semicolons(PsqlScanState state);
+extern int	psql_scan_get_escaped_semicolons(PsqlScanState state);
 
 extern void psql_scan_reselect_sql_lexer(PsqlScanState state);
 

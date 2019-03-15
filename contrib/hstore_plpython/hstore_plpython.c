@@ -128,7 +128,7 @@ Datum
 plpython_to_hstore(PG_FUNCTION_ARGS)
 {
 	PyObject   *dict;
-	PyObject *volatile items = NULL;
+	PyObject   *volatile items = NULL;
 	int32		pcount;
 	HStore	   *out;
 

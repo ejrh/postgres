@@ -135,7 +135,7 @@ static void bt_tuple_present_callback(Relation index, HeapTuple htup,
 						  Datum *values, bool *isnull,
 						  bool tupleIsAlive, void *checkstate);
 static IndexTuple bt_normalize_tuple(BtreeCheckState *state,
-						   IndexTuple itup);
+				   IndexTuple itup);
 static inline bool offset_is_negative_infinity(BTPageOpaque opaque,
 							OffsetNumber offset);
 static inline bool invariant_leq_offset(BtreeCheckState *state,
@@ -501,12 +501,12 @@ bt_check_every_level(Relation rel, Relation heaprel, bool readonly,
 		 *
 		 * Note that IndexBuildHeapScan() calls heap_endscan() for us.
 		 */
-		scan = table_beginscan_strat(state->heaprel, /* relation */
+		scan = table_beginscan_strat(state->heaprel,	/* relation */
 									 snapshot,	/* snapshot */
-									 0,	/* number of keys */
+									 0, /* number of keys */
 									 NULL,	/* scan key */
 									 true,	/* buffer access strategy OK */
-									 true);	/* syncscan OK? */
+									 true); /* syncscan OK? */
 
 		/*
 		 * Scan will behave as the first scan of a CREATE INDEX CONCURRENTLY
@@ -912,7 +912,7 @@ bt_target_page_check(BtreeCheckState *state)
 		/* Fingerprint leaf page tuples (those that point to the heap) */
 		if (state->heapallindexed && P_ISLEAF(topaque) && !ItemIdIsDead(itemid))
 		{
-			IndexTuple		norm;
+			IndexTuple	norm;
 
 			norm = bt_normalize_tuple(state, itup);
 			bloom_add_element(state->filter, (unsigned char *) norm,
@@ -1684,7 +1684,8 @@ bt_tuple_present_callback(Relation index, HeapTuple htup, Datum *values,
 						  bool *isnull, bool tupleIsAlive, void *checkstate)
 {
 	BtreeCheckState *state = (BtreeCheckState *) checkstate;
-	IndexTuple	itup, norm;
+	IndexTuple	itup,
+				norm;
 
 	Assert(state->heapallindexed);
 
@@ -1764,7 +1765,7 @@ bt_normalize_tuple(BtreeCheckState *state, IndexTuple itup)
 
 	for (i = 0; i < tupleDescriptor->natts; i++)
 	{
-		Form_pg_attribute	att;
+		Form_pg_attribute att;
 
 		att = TupleDescAttr(tupleDescriptor, i);
 

@@ -112,7 +112,7 @@ typedef union
 {
 	PageHeaderData phdr;
 	uint32		data[BLCKSZ / (sizeof(uint32) * N_SUMS)][N_SUMS];
-} PGChecksummablePage;
+}			PGChecksummablePage;
 
 /*
  * Base offsets to initialize each of the parallel FNV hashes into a
@@ -143,7 +143,7 @@ do { \
  * (at least on 4-byte boundary).
  */
 static uint32
-pg_checksum_block(const PGChecksummablePage *page)
+pg_checksum_block(const PGChecksummablePage * page)
 {
 	uint32		sums[N_SUMS];
 	uint32		result = 0;

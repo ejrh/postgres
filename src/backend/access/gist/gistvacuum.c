@@ -30,11 +30,11 @@ typedef struct
 	void	   *callback_state;
 	GistNSN		startNSN;
 	BlockNumber totFreePages;	/* true total # of free pages */
-} GistVacState;
+}			GistVacState;
 
 static void gistvacuumscan(IndexVacuumInfo *info, IndexBulkDeleteResult *stats,
 			   IndexBulkDeleteCallback callback, void *callback_state);
-static void gistvacuumpage(GistVacState *vstate, BlockNumber blkno,
+static void gistvacuumpage(GistVacState * vstate, BlockNumber blkno,
 			   BlockNumber orig_blkno);
 
 /*
@@ -208,7 +208,7 @@ gistvacuumscan(IndexVacuumInfo *info, IndexBulkDeleteResult *stats,
  * are recursing to re-examine a previous page).
  */
 static void
-gistvacuumpage(GistVacState *vstate, BlockNumber blkno, BlockNumber orig_blkno)
+gistvacuumpage(GistVacState * vstate, BlockNumber blkno, BlockNumber orig_blkno)
 {
 	IndexVacuumInfo *info = vstate->info;
 	IndexBulkDeleteResult *stats = vstate->stats;

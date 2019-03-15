@@ -1186,7 +1186,7 @@ _copyPartitionPruneInfo(const PartitionPruneInfo *from)
 }
 
 static PartitionedRelPruneInfo *
-_copyPartitionedRelPruneInfo(const PartitionedRelPruneInfo *from)
+_copyPartitionedRelPruneInfo(const PartitionedRelPruneInfo * from)
 {
 	PartitionedRelPruneInfo *newnode = makeNode(PartitionedRelPruneInfo);
 
@@ -1491,7 +1491,7 @@ _copyWindowFunc(const WindowFunc *from)
  * _copySubscriptingRef
  */
 static SubscriptingRef *
-_copySubscriptingRef(const SubscriptingRef *from)
+_copySubscriptingRef(const SubscriptingRef * from)
 {
 	SubscriptingRef *newnode = makeNode(SubscriptingRef);
 

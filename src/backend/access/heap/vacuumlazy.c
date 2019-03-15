@@ -1058,6 +1058,7 @@ lazy_scan_heap(Relation onerel, int options, LVRelStats *vacrelstats,
 					all_visible = false;
 					break;
 				case HEAPTUPLE_LIVE:
+
 					/*
 					 * Count it as live.  Not only is this natural, but it's
 					 * also what acquire_sample_rows() does.

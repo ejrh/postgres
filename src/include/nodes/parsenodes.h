@@ -1407,7 +1407,7 @@ typedef enum CTEMaterialize
 	CTEMaterializeDefault,		/* no option specified */
 	CTEMaterializeAlways,		/* MATERIALIZED */
 	CTEMaterializeNever			/* NOT MATERIALIZED */
-} CTEMaterialize;
+}			CTEMaterialize;
 
 typedef struct CommonTableExpr
 {

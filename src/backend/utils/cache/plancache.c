@@ -1519,7 +1519,7 @@ GetCachedExpression(Node *expr)
  *		Delete a CachedExpression.
  */
 void
-FreeCachedExpression(CachedExpression *cexpr)
+FreeCachedExpression(CachedExpression * cexpr)
 {
 	/* Sanity check */
 	Assert(cexpr->magic == CACHEDEXPR_MAGIC);

@@ -27,7 +27,7 @@
 
 /* Combiner function for rbtree.c */
 static void
-ginCombineData(RBTNode *existing, const RBTNode *newdata, void *arg)
+ginCombineData(RBTNode * existing, const RBTNode * newdata, void *arg)
 {
 	GinEntryAccumulator *eo = (GinEntryAccumulator *) existing;
 	const GinEntryAccumulator *en = (const GinEntryAccumulator *) newdata;
@@ -69,7 +69,7 @@ ginCombineData(RBTNode *existing, const RBTNode *newdata, void *arg)
 
 /* Comparator function for rbtree.c */
 static int
-cmpEntryAccumulator(const RBTNode *a, const RBTNode *b, void *arg)
+cmpEntryAccumulator(const RBTNode * a, const RBTNode * b, void *arg)
 {
 	const GinEntryAccumulator *ea = (const GinEntryAccumulator *) a;
 	const GinEntryAccumulator *eb = (const GinEntryAccumulator *) b;
@@ -163,7 +163,7 @@ ginInsertBAEntry(BuildAccumulator *accum,
 	/* temporarily set up single-entry itempointer list */
 	eatmp.list = heapptr;
 
-	ea = (GinEntryAccumulator *) rbt_insert(accum->tree, (RBTNode *) &eatmp,
+	ea = (GinEntryAccumulator *) rbt_insert(accum->tree, (RBTNode *) & eatmp,
 											&isNew);
 
 	if (isNew)

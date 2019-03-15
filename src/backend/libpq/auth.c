@@ -2183,8 +2183,8 @@ CheckPAMAuth(Port *port, const char *user, const char *password)
 	 * later used inside the PAM conversation to pass the password to the
 	 * authentication module.
 	 */
-	pam_passw_conv.appdata_ptr = unconstify(char *, password); /* from password above,
-													 * not allocated */
+	pam_passw_conv.appdata_ptr = unconstify(char *, password);	/* from password above,
+																 * not allocated */
 
 	/* Optionally, one can set the service name in pg_hba.conf */
 	if (port->hba->pamservice && port->hba->pamservice[0] != '\0')
@@ -2373,8 +2373,8 @@ InitializeLDAPConnection(Port *port, LDAP **ldap)
 		char	   *uris = NULL;
 
 		/*
-		 * We have a space-separated list of hostnames.  Convert it
-		 * to a space-separated list of URIs.
+		 * We have a space-separated list of hostnames.  Convert it to a
+		 * space-separated list of URIs.
 		 */
 		do
 		{

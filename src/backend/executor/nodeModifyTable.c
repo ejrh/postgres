@@ -832,8 +832,8 @@ ldelete:;
 			else
 			{
 				BufferHeapTupleTableSlot *bslot;
-				HeapTuple deltuple;
-				Buffer buffer;
+				HeapTuple	deltuple;
+				Buffer		buffer;
 
 				Assert(TTS_IS_BUFFERTUPLE(slot));
 				ExecClearTuple(slot);
@@ -925,7 +925,7 @@ ExecUpdate(ModifyTableState *mtstate,
 	{
 		if (!ExecBRUpdateTriggers(estate, epqstate, resultRelInfo,
 								  tupleid, oldtuple, slot))
-			return NULL;        /* "do nothing" */
+			return NULL;		/* "do nothing" */
 	}
 
 	/* INSTEAD OF ROW UPDATE Triggers */
@@ -934,7 +934,7 @@ ExecUpdate(ModifyTableState *mtstate,
 	{
 		if (!ExecIRUpdateTriggers(estate, resultRelInfo,
 								  oldtuple, slot))
-			return NULL;        /* "do nothing" */
+			return NULL;		/* "do nothing" */
 	}
 	else if (resultRelInfo->ri_FdwRoutine)
 	{

@@ -35,7 +35,7 @@ typedef struct IntRBTreeNode
  * since none of our test keys are negative.
  */
 static int
-irbt_cmp(const RBTNode *a, const RBTNode *b, void *arg)
+irbt_cmp(const RBTNode * a, const RBTNode * b, void *arg)
 {
 	const IntRBTreeNode *ea = (const IntRBTreeNode *) a;
 	const IntRBTreeNode *eb = (const IntRBTreeNode *) b;
@@ -48,7 +48,7 @@ irbt_cmp(const RBTNode *a, const RBTNode *b, void *arg)
  * try to combine unequal keys.
  */
 static void
-irbt_combine(RBTNode *existing, const RBTNode *newdata, void *arg)
+irbt_combine(RBTNode * existing, const RBTNode * newdata, void *arg)
 {
 	const IntRBTreeNode *eexist = (const IntRBTreeNode *) existing;
 	const IntRBTreeNode *enew = (const IntRBTreeNode *) newdata;
@@ -67,7 +67,7 @@ irbt_alloc(void *arg)
 
 /* Node freer */
 static void
-irbt_free(RBTNode *node, void *arg)
+irbt_free(RBTNode * node, void *arg)
 {
 	pfree(node);
 }
@@ -134,7 +134,7 @@ rbt_populate(RBTree *tree, int size, int step)
 	for (i = 0; i < size; i++)
 	{
 		node.key = step * permutation[i];
-		rbt_insert(tree, (RBTNode *) &node, &isNew);
+		rbt_insert(tree, (RBTNode *) & node, &isNew);
 		if (!isNew)
 			elog(ERROR, "unexpected !isNew result from rbt_insert");
 	}
@@ -146,7 +146,7 @@ rbt_populate(RBTree *tree, int size, int step)
 	if (size > 0)
 	{
 		node.key = step * permutation[0];
-		rbt_insert(tree, (RBTNode *) &node, &isNew);
+		rbt_insert(tree, (RBTNode *) & node, &isNew);
 		if (isNew)
 			elog(ERROR, "unexpected isNew result from rbt_insert");
 	}
@@ -254,7 +254,7 @@ testfind(int size)
 		IntRBTreeNode *resultNode;
 
 		node.key = 2 * i;
-		resultNode = (IntRBTreeNode *) rbt_find(tree, (RBTNode *) &node);
+		resultNode = (IntRBTreeNode *) rbt_find(tree, (RBTNode *) & node);
 		if (resultNode == NULL)
 			elog(ERROR, "inserted element was not found");
 		if (node.key != resultNode->key)
@@ -271,7 +271,7 @@ testfind(int size)
 		IntRBTreeNode *resultNode;
 
 		node.key = i;
-		resultNode = (IntRBTreeNode *) rbt_find(tree, (RBTNode *) &node);
+		resultNode = (IntRBTreeNode *) rbt_find(tree, (RBTNode *) & node);
 		if (resultNode != NULL)
 			elog(ERROR, "not-inserted element was found");
 	}
@@ -336,7 +336,7 @@ testdelete(int size, int delsize)
 
 		find.key = deleteIds[i];
 		/* Locate the node to be deleted */
-		node = (IntRBTreeNode *) rbt_find(tree, (RBTNode *) &find);
+		node = (IntRBTreeNode *) rbt_find(tree, (RBTNode *) & find);
 		if (node == NULL || node->key != deleteIds[i])
 			elog(ERROR, "expected element was not found during deleting");
 		/* Delete it */
@@ -350,7 +350,7 @@ testdelete(int size, int delsize)
 		IntRBTreeNode *result;
 
 		node.key = i;
-		result = (IntRBTreeNode *) rbt_find(tree, (RBTNode *) &node);
+		result = (IntRBTreeNode *) rbt_find(tree, (RBTNode *) & node);
 		if (chosen[i])
 		{
 			/* Deleted element should be absent */
@@ -375,7 +375,7 @@ testdelete(int size, int delsize)
 			continue;
 		find.key = i;
 		/* Locate the node to be deleted */
-		node = (IntRBTreeNode *) rbt_find(tree, (RBTNode *) &find);
+		node = (IntRBTreeNode *) rbt_find(tree, (RBTNode *) & find);
 		if (node == NULL || node->key != i)
 			elog(ERROR, "expected element was not found during deleting");
 		/* Delete it */

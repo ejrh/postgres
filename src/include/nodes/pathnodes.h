@@ -1211,7 +1211,7 @@ typedef struct IndexClause
 	bool		lossy;			/* are indexquals a lossy version of clause? */
 	AttrNumber	indexcol;		/* index column the clause uses (zero-based) */
 	List	   *indexcols;		/* multiple index columns, if RowCompare */
-} IndexClause;
+}			IndexClause;
 
 /*
  * BitmapHeapPath represents one or more indexscans that generate TID bitmaps
@@ -1398,7 +1398,7 @@ typedef struct GroupResultPath
 {
 	Path		path;
 	List	   *quals;
-} GroupResultPath;
+}			GroupResultPath;
 
 /*
  * MaterialPath represents use of a Material plan node, i.e., caching of

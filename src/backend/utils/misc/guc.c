@@ -457,13 +457,13 @@ const struct config_enum_entry ssl_protocol_versions_info[] = {
 
 static struct config_enum_entry shared_memory_options[] = {
 #ifndef WIN32
-	{ "sysv", SHMEM_TYPE_SYSV, false},
+	{"sysv", SHMEM_TYPE_SYSV, false},
 #endif
 #ifndef EXEC_BACKEND
-	{ "mmap", SHMEM_TYPE_MMAP, false},
+	{"mmap", SHMEM_TYPE_MMAP, false},
 #endif
 #ifdef WIN32
-	{ "windows", SHMEM_TYPE_WINDOWS, false},
+	{"windows", SHMEM_TYPE_WINDOWS, false},
 #endif
 	{NULL, 0, false}
 };
@@ -1557,6 +1557,7 @@ static struct config_bool ConfigureNamesBool[] =
 		true,
 		NULL, NULL, NULL
 	},
+
 	/*
 	 * WITH OIDS support, and consequently default_with_oids, was removed in
 	 * PostgreSQL 12, but we tolerate the parameter being set to false to

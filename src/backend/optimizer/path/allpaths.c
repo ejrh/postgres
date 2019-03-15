@@ -1044,8 +1044,8 @@ set_append_rel_size(PlannerInfo *root, RelOptInfo *rel,
 		/*
 		 * We have to copy the parent's targetlist and quals to the child,
 		 * with appropriate substitution of variables.  If any constant false
-		 * or NULL clauses turn up, we can disregard the child right away.
-		 * If not, we can apply constraint exclusion with just the
+		 * or NULL clauses turn up, we can disregard the child right away. If
+		 * not, we can apply constraint exclusion with just the
 		 * baserestrictinfo quals.
 		 */
 		if (!apply_child_basequals(root, rel, childrel, childRTE, appinfo))

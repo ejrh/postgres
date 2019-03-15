@@ -217,7 +217,7 @@ typedef struct floating_decimal_32
 {
 	uint32		mantissa;
 	int32		exponent;
-} floating_decimal_32;
+}			floating_decimal_32;
 
 static inline floating_decimal_32
 f2d(const uint32 ieeeMantissa, const uint32 ieeeExponent)
@@ -481,10 +481,10 @@ to_chars_f(const floating_decimal_32 v, const uint32 olength, char *const result
 	else
 	{
 		/*
-		 * We can save some code later by pre-filling with zeros. We know
-		 * that there can be no more than 6 output digits in this form,
-		 * otherwise we would not choose fixed-point output. memset 8
-		 * rather than 6 bytes to let the compiler optimize it.
+		 * We can save some code later by pre-filling with zeros. We know that
+		 * there can be no more than 6 output digits in this form, otherwise
+		 * we would not choose fixed-point output. memset 8 rather than 6
+		 * bytes to let the compiler optimize it.
 		 */
 		Assert(exp < 6 && exp + olength <= 6);
 		memset(result, '0', 8);
@@ -575,8 +575,8 @@ to_chars(const floating_decimal_32 v, const bool sign, char *const result)
 
 	/*
 	 * The thresholds for fixed-point output are chosen to match printf
-	 * defaults. Beware that both the code of to_chars_f and the value
-	 * of FLOAT_SHORTEST_DECIMAL_LEN are sensitive to these thresholds.
+	 * defaults. Beware that both the code of to_chars_f and the value of
+	 * FLOAT_SHORTEST_DECIMAL_LEN are sensitive to these thresholds.
 	 */
 	if (exp >= -4 && exp < 6)
 		return to_chars_f(v, olength, result + index) + sign;
@@ -689,7 +689,7 @@ to_chars(const floating_decimal_32 v, const bool sign, char *const result)
 static inline bool
 f2d_small_int(const uint32 ieeeMantissa,
 			  const uint32 ieeeExponent,
-			  floating_decimal_32 *v)
+			  floating_decimal_32 * v)
 {
 	const int32 e2 = (int32) ieeeExponent - FLOAT_BIAS - FLOAT_MANTISSA_BITS;
 

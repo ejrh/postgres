@@ -84,7 +84,7 @@ static Plan *create_join_plan(PlannerInfo *root, JoinPath *best_path);
 static Plan *create_append_plan(PlannerInfo *root, AppendPath *best_path);
 static Plan *create_merge_append_plan(PlannerInfo *root, MergeAppendPath *best_path);
 static Result *create_group_result_plan(PlannerInfo *root,
-						 GroupResultPath *best_path);
+						 GroupResultPath * best_path);
 static ProjectSet *create_project_set_plan(PlannerInfo *root, ProjectSetPath *best_path);
 static Material *create_material_plan(PlannerInfo *root, MaterialPath *best_path,
 					 int flags);
@@ -1297,7 +1297,7 @@ create_merge_append_plan(PlannerInfo *root, MergeAppendPath *best_path)
  *	  Returns a Plan node.
  */
 static Result *
-create_group_result_plan(PlannerInfo *root, GroupResultPath *best_path)
+create_group_result_plan(PlannerInfo *root, GroupResultPath * best_path)
 {
 	Result	   *plan;
 	List	   *tlist;

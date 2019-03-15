@@ -335,7 +335,7 @@ static void pgstat_recv_funcstat(PgStat_MsgFuncstat *msg, int len);
 static void pgstat_recv_funcpurge(PgStat_MsgFuncpurge *msg, int len);
 static void pgstat_recv_recoveryconflict(PgStat_MsgRecoveryConflict *msg, int len);
 static void pgstat_recv_deadlock(PgStat_MsgDeadlock *msg, int len);
-static void pgstat_recv_checksum_failure(PgStat_MsgChecksumFailure *msg, int len);
+static void pgstat_recv_checksum_failure(PgStat_MsgChecksumFailure * msg, int len);
 static void pgstat_recv_tempfile(PgStat_MsgTempFile *msg, int len);
 
 /* ------------------------------------------------------------
@@ -4498,7 +4498,7 @@ PgstatCollectorMain(int argc, char *argv[])
 					break;
 
 				case PGSTAT_MTYPE_CHECKSUMFAILURE:
-					pgstat_recv_checksum_failure((PgStat_MsgChecksumFailure *) &msg, len);
+					pgstat_recv_checksum_failure((PgStat_MsgChecksumFailure *) & msg, len);
 					break;
 
 				default:
@@ -6250,7 +6250,7 @@ pgstat_recv_deadlock(PgStat_MsgDeadlock *msg, int len)
  * ----------
  */
 static void
-pgstat_recv_checksum_failure(PgStat_MsgChecksumFailure *msg, int len)
+pgstat_recv_checksum_failure(PgStat_MsgChecksumFailure * msg, int len)
 {
 	PgStat_StatDBEntry *dbentry;
 

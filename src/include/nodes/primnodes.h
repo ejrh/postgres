@@ -417,7 +417,7 @@ typedef struct SubscriptingRef
 
 	Expr	   *refassgnexpr;	/* expression for the source value, or NULL if
 								 * fetch */
-} SubscriptingRef;
+}			SubscriptingRef;
 
 /*
  * CoercionContext - distinguishes the allowed set of type casts

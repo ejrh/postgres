@@ -68,7 +68,7 @@ SampleNext(SampleScanState *node)
 	if (tuple)
 		ExecStoreBufferHeapTuple(tuple, /* tuple to store */
 								 slot,	/* slot to store in */
-								 hscan->rs_cbuf); /* tuple's buffer */
+								 hscan->rs_cbuf);	/* tuple's buffer */
 	else
 		ExecClearTuple(slot);
 
@@ -392,7 +392,7 @@ tablesample_getnext(SampleScanState *scanstate)
 	else
 	{
 		/* continue from previously returned page/tuple */
-		blockno = hscan->rs_cblock;	/* current page */
+		blockno = hscan->rs_cblock; /* current page */
 	}
 
 	/*

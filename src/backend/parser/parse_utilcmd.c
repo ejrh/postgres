@@ -3703,11 +3703,11 @@ transformPartitionBound(ParseState *pstate, Relation parent,
 		 * any necessary validation.
 		 */
 		result_spec->lowerdatums =
-					transformPartitionRangeBounds(pstate, spec->lowerdatums,
-												  parent);
+			transformPartitionRangeBounds(pstate, spec->lowerdatums,
+										  parent);
 		result_spec->upperdatums =
-					transformPartitionRangeBounds(pstate, spec->upperdatums,
-												  parent);
+			transformPartitionRangeBounds(pstate, spec->upperdatums,
+										  parent);
 	}
 	else
 		elog(ERROR, "unexpected partition strategy: %d", (int) strategy);
@@ -3734,17 +3734,17 @@ transformPartitionRangeBounds(ParseState *pstate, List *blist,
 	i = j = 0;
 	foreach(lc, blist)
 	{
-		Node *expr = lfirst(lc);
+		Node	   *expr = lfirst(lc);
 		PartitionRangeDatum *prd = NULL;
 
 		/*
-		 * Infinite range bounds -- "minvalue" and "maxvalue" -- get passed
-		 * in as ColumnRefs.
+		 * Infinite range bounds -- "minvalue" and "maxvalue" -- get passed in
+		 * as ColumnRefs.
 		 */
 		if (IsA(expr, ColumnRef))
 		{
-			ColumnRef *cref = (ColumnRef *) expr;
-			char *cname = NULL;
+			ColumnRef  *cref = (ColumnRef *) expr;
+			char	   *cname = NULL;
 
 			if (list_length(cref->fields) == 1 &&
 				IsA(linitial(cref->fields), String))
@@ -3811,8 +3811,8 @@ transformPartitionRangeBounds(ParseState *pstate, List *blist,
 	}
 
 	/*
-	 * Once we see MINVALUE or MAXVALUE for one column, the remaining
-	 * columns must be the same.
+	 * Once we see MINVALUE or MAXVALUE for one column, the remaining columns
+	 * must be the same.
 	 */
 	validateInfiniteBounds(pstate, result);
 
@@ -3876,13 +3876,13 @@ transformPartitionBoundValue(ParseState *pstate, Node *val,
 
 	/*
 	 * Check that the input expression's collation is compatible with one
-	 * specified for the parent's partition key (partcollation).  Don't
-	 * throw an error if it's the default collation which we'll replace with
-	 * the parent's collation anyway.
+	 * specified for the parent's partition key (partcollation).  Don't throw
+	 * an error if it's the default collation which we'll replace with the
+	 * parent's collation anyway.
 	 */
 	if (IsA(value, CollateExpr))
 	{
-		Oid		exprCollOid = exprCollation(value);
+		Oid			exprCollOid = exprCollation(value);
 
 		if (OidIsValid(exprCollOid) &&
 			exprCollOid != DEFAULT_COLLATION_OID &&

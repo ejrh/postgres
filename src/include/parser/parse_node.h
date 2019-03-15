@@ -70,7 +70,7 @@ typedef enum ParseExprKind
 	EXPR_KIND_POLICY,			/* USING or WITH CHECK expr in policy */
 	EXPR_KIND_PARTITION_BOUND,	/* partition bound expression */
 	EXPR_KIND_PARTITION_EXPRESSION, /* PARTITION BY expression */
-	EXPR_KIND_CALL_ARGUMENT,		/* procedure argument in CALL */
+	EXPR_KIND_CALL_ARGUMENT,	/* procedure argument in CALL */
 	EXPR_KIND_COPY_WHERE		/* WHERE condition in COPY FROM */
 } ParseExprKind;
 
@@ -275,13 +275,13 @@ extern Var *make_var(ParseState *pstate, RangeTblEntry *rte, int attrno,
 		 int location);
 extern Oid	transformContainerType(Oid *containerType, int32 *containerTypmod);
 
-extern SubscriptingRef *transformContainerSubscripts(ParseState *pstate,
-							 Node *containerBase,
-							 Oid containerType,
-							 Oid elementType,
-							 int32 containerTypMod,
-							 List *indirection,
-							 Node *assignFrom);
+extern SubscriptingRef * transformContainerSubscripts(ParseState *pstate,
+													  Node *containerBase,
+													  Oid containerType,
+													  Oid elementType,
+													  int32 containerTypMod,
+													  List *indirection,
+													  Node *assignFrom);
 extern Const *make_const(ParseState *pstate, Value *value, int location);
 
 #endif							/* PARSE_NODE_H */

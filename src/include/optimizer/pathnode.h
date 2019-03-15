@@ -74,10 +74,10 @@ extern MergeAppendPath *create_merge_append_path(PlannerInfo *root,
 						 List *pathkeys,
 						 Relids required_outer,
 						 List *partitioned_rels);
-extern GroupResultPath *create_group_result_path(PlannerInfo *root,
-						 RelOptInfo *rel,
-						 PathTarget *target,
-						 List *havingqual);
+extern GroupResultPath * create_group_result_path(PlannerInfo *root,
+												  RelOptInfo *rel,
+												  PathTarget *target,
+												  List *havingqual);
 extern MaterialPath *create_material_path(RelOptInfo *rel, Path *subpath);
 extern UniquePath *create_unique_path(PlannerInfo *root, RelOptInfo *rel,
 				   Path *subpath, SpecialJoinInfo *sjinfo);

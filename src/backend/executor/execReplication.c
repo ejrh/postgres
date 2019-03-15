@@ -170,7 +170,7 @@ retry:
 		HeapUpdateFailureData hufd;
 		HTSU_Result res;
 		HeapTupleData locktup;
-		HeapTupleTableSlot *hslot = (HeapTupleTableSlot *)outslot;
+		HeapTupleTableSlot *hslot = (HeapTupleTableSlot *) outslot;
 
 		/* Only a heap tuple has item pointers. */
 		Assert(TTS_IS_HEAPTUPLE(outslot) || TTS_IS_BUFFERTUPLE(outslot));
@@ -226,7 +226,7 @@ retry:
 static bool
 tuples_equal(TupleTableSlot *slot1, TupleTableSlot *slot2)
 {
-	int         attrnum;
+	int			attrnum;
 
 	Assert(slot1->tts_tupleDescriptor->natts ==
 		   slot2->tts_tupleDescriptor->natts);
@@ -334,7 +334,7 @@ retry:
 		HeapUpdateFailureData hufd;
 		HTSU_Result res;
 		HeapTupleData locktup;
-		HeapTupleTableSlot *hslot = (HeapTupleTableSlot *)outslot;
+		HeapTupleTableSlot *hslot = (HeapTupleTableSlot *) outslot;
 
 		/* Only a heap tuple has item pointers. */
 		Assert(TTS_IS_HEAPTUPLE(outslot) || TTS_IS_BUFFERTUPLE(outslot));
@@ -406,7 +406,7 @@ ExecSimpleRelationInsert(EState *estate, TupleTableSlot *slot)
 		resultRelInfo->ri_TrigDesc->trig_insert_before_row)
 	{
 		if (!ExecBRInsertTriggers(estate, resultRelInfo, slot))
-			skip_tuple = true;		/* "do nothing" */
+			skip_tuple = true;	/* "do nothing" */
 	}
 
 	if (!skip_tuple)
@@ -459,7 +459,7 @@ ExecSimpleRelationUpdate(EState *estate, EPQState *epqstate,
 	HeapTuple	tuple;
 	ResultRelInfo *resultRelInfo = estate->es_result_relation_info;
 	Relation	rel = resultRelInfo->ri_RelationDesc;
-	HeapTupleTableSlot *hsearchslot = (HeapTupleTableSlot *)searchslot;
+	HeapTupleTableSlot *hsearchslot = (HeapTupleTableSlot *) searchslot;
 
 	/* We expect the searchslot to contain a heap tuple. */
 	Assert(TTS_IS_HEAPTUPLE(searchslot) || TTS_IS_BUFFERTUPLE(searchslot));
@@ -476,7 +476,7 @@ ExecSimpleRelationUpdate(EState *estate, EPQState *epqstate,
 		if (!ExecBRUpdateTriggers(estate, epqstate, resultRelInfo,
 								  &hsearchslot->tuple->t_self,
 								  NULL, slot))
-			skip_tuple = true;		/* "do nothing" */
+			skip_tuple = true;	/* "do nothing" */
 	}
 
 	if (!skip_tuple)
@@ -525,7 +525,7 @@ ExecSimpleRelationDelete(EState *estate, EPQState *epqstate,
 	bool		skip_tuple = false;
 	ResultRelInfo *resultRelInfo = estate->es_result_relation_info;
 	Relation	rel = resultRelInfo->ri_RelationDesc;
-	HeapTupleTableSlot *hsearchslot = (HeapTupleTableSlot *)searchslot;
+	HeapTupleTableSlot *hsearchslot = (HeapTupleTableSlot *) searchslot;
 
 	/* For now we support only tables and heap tuples. */
 	Assert(rel->rd_rel->relkind == RELKIND_RELATION);
@@ -606,8 +606,8 @@ CheckSubscriptionRelkind(char relkind, const char *nspname,
 						 const char *relname)
 {
 	/*
-	 * We currently only support writing to regular tables.  However, give
-	 * a more specific error for partitioned and foreign tables.
+	 * We currently only support writing to regular tables.  However, give a
+	 * more specific error for partitioned and foreign tables.
 	 */
 	if (relkind == RELKIND_PARTITIONED_TABLE)
 		ereport(ERROR,
@@ -615,14 +615,14 @@ CheckSubscriptionRelkind(char relkind, const char *nspname,
 				 errmsg("cannot use relation \"%s.%s\" as logical replication target",
 						nspname, relname),
 				 errdetail("\"%s.%s\" is a partitioned table.",
-						nspname, relname)));
+						   nspname, relname)));
 	else if (relkind == RELKIND_FOREIGN_TABLE)
 		ereport(ERROR,
 				(errcode(ERRCODE_WRONG_OBJECT_TYPE),
 				 errmsg("cannot use relation \"%s.%s\" as logical replication target",
 						nspname, relname),
 				 errdetail("\"%s.%s\" is a foreign table.",
-						nspname, relname)));
+						   nspname, relname)));
 
 	if (relkind != RELKIND_RELATION)
 		ereport(ERROR,
@@ -630,5 +630,5 @@ CheckSubscriptionRelkind(char relkind, const char *nspname,
 				 errmsg("cannot use relation \"%s.%s\" as logical replication target",
 						nspname, relname),
 				 errdetail("\"%s.%s\" is not a table.",
-						nspname, relname)));
+						   nspname, relname)));
 }

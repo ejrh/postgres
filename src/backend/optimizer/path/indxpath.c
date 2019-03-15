@@ -150,37 +150,37 @@ static void match_clause_to_index(PlannerInfo *root,
 					  RestrictInfo *rinfo,
 					  IndexOptInfo *index,
 					  IndexClauseSet *clauseset);
-static IndexClause *match_clause_to_indexcol(PlannerInfo *root,
-						 RestrictInfo *rinfo,
-						 int indexcol,
-						 IndexOptInfo *index);
-static IndexClause *match_boolean_index_clause(RestrictInfo *rinfo,
-						   int indexcol, IndexOptInfo *index);
-static IndexClause *match_opclause_to_indexcol(PlannerInfo *root,
-						   RestrictInfo *rinfo,
-						   int indexcol,
-						   IndexOptInfo *index);
-static IndexClause *match_funcclause_to_indexcol(PlannerInfo *root,
-							 RestrictInfo *rinfo,
-							 int indexcol,
-							 IndexOptInfo *index);
-static IndexClause *get_index_clause_from_support(PlannerInfo *root,
-							  RestrictInfo *rinfo,
-							  Oid funcid,
-							  int indexarg,
-							  int indexcol,
-							  IndexOptInfo *index);
-static IndexClause *match_saopclause_to_indexcol(RestrictInfo *rinfo,
-							 int indexcol,
-							 IndexOptInfo *index);
-static IndexClause *match_rowcompare_to_indexcol(RestrictInfo *rinfo,
-							 int indexcol,
-							 IndexOptInfo *index);
-static IndexClause *expand_indexqual_rowcompare(RestrictInfo *rinfo,
-							int indexcol,
-							IndexOptInfo *index,
-							Oid expr_op,
-							bool var_on_left);
+static IndexClause * match_clause_to_indexcol(PlannerInfo *root,
+											  RestrictInfo *rinfo,
+											  int indexcol,
+											  IndexOptInfo *index);
+static IndexClause * match_boolean_index_clause(RestrictInfo *rinfo,
+												int indexcol, IndexOptInfo *index);
+static IndexClause * match_opclause_to_indexcol(PlannerInfo *root,
+												RestrictInfo *rinfo,
+												int indexcol,
+												IndexOptInfo *index);
+static IndexClause * match_funcclause_to_indexcol(PlannerInfo *root,
+												  RestrictInfo *rinfo,
+												  int indexcol,
+												  IndexOptInfo *index);
+static IndexClause * get_index_clause_from_support(PlannerInfo *root,
+												   RestrictInfo *rinfo,
+												   Oid funcid,
+												   int indexarg,
+												   int indexcol,
+												   IndexOptInfo *index);
+static IndexClause * match_saopclause_to_indexcol(RestrictInfo *rinfo,
+												  int indexcol,
+												  IndexOptInfo *index);
+static IndexClause * match_rowcompare_to_indexcol(RestrictInfo *rinfo,
+												  int indexcol,
+												  IndexOptInfo *index);
+static IndexClause * expand_indexqual_rowcompare(RestrictInfo *rinfo,
+												 int indexcol,
+												 IndexOptInfo *index,
+												 Oid expr_op,
+												 bool var_on_left);
 static void match_pathkeys_to_index(IndexOptInfo *index, List *pathkeys,
 						List **orderby_clauses_p,
 						List **clause_columns_p);

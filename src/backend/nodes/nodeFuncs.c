@@ -68,7 +68,7 @@ exprType(const Node *expr)
 			break;
 		case T_SubscriptingRef:
 			{
-				const SubscriptingRef *sbsref = (const SubscriptingRef *) expr;
+				const		SubscriptingRef *sbsref = (const SubscriptingRef *) expr;
 
 				/* slice and/or store operations yield the container type */
 				if (sbsref->reflowerindexpr || sbsref->refassgnexpr)

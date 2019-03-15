@@ -936,7 +936,7 @@ _outPartitionPruneInfo(StringInfo str, const PartitionPruneInfo *node)
 }
 
 static void
-_outPartitionedRelPruneInfo(StringInfo str, const PartitionedRelPruneInfo *node)
+_outPartitionedRelPruneInfo(StringInfo str, const PartitionedRelPruneInfo * node)
 {
 	WRITE_NODE_TYPE("PARTITIONEDRELPRUNEINFO");
 
@@ -1155,7 +1155,7 @@ _outWindowFunc(StringInfo str, const WindowFunc *node)
 }
 
 static void
-_outSubscriptingRef(StringInfo str, const SubscriptingRef *node)
+_outSubscriptingRef(StringInfo str, const SubscriptingRef * node)
 {
 	WRITE_NODE_TYPE("SUBSCRIPTINGREF");
 
@@ -1855,7 +1855,7 @@ _outMergeAppendPath(StringInfo str, const MergeAppendPath *node)
 }
 
 static void
-_outGroupResultPath(StringInfo str, const GroupResultPath *node)
+_outGroupResultPath(StringInfo str, const GroupResultPath * node)
 {
 	WRITE_NODE_TYPE("GROUPRESULTPATH");
 
@@ -2448,7 +2448,7 @@ _outRestrictInfo(StringInfo str, const RestrictInfo *node)
 }
 
 static void
-_outIndexClause(StringInfo str, const IndexClause *node)
+_outIndexClause(StringInfo str, const IndexClause * node)
 {
 	WRITE_NODE_TYPE("INDEXCLAUSE");
 

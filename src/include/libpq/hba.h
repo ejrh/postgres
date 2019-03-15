@@ -63,7 +63,7 @@ typedef enum ClientCertMode
 	clientCertOff,
 	clientCertCA,
 	clientCertFull
-} ClientCertMode;
+}			ClientCertMode;
 
 typedef struct HbaLine
 {

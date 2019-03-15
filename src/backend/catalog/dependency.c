@@ -130,7 +130,7 @@ typedef struct
 {
 	ObjectAddress obj;			/* object to be deleted --- MUST BE FIRST */
 	int			subflags;		/* flags to pass down when recursing to obj */
-} ObjectAddressAndFlags;
+}			ObjectAddressAndFlags;
 
 /* for find_expr_references_walker */
 typedef struct

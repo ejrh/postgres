@@ -237,7 +237,7 @@ PLyMapping_ToJsonbValue(PyObject *obj, JsonbParseState **jsonb_state)
 	JsonbValue *out = NULL;
 
 	/* We need it volatile, since we use it after longjmp */
-	PyObject *volatile items = NULL;
+	PyObject   *volatile items = NULL;
 
 	pcount = PyMapping_Size(obj);
 	items = PyMapping_Items(obj);

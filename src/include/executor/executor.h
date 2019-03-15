@@ -125,14 +125,14 @@ extern TupleHashTable BuildTupleHashTable(PlanState *parent,
 					MemoryContext tablecxt,
 					MemoryContext tempcxt, bool use_variable_hash_iv);
 extern TupleHashTable BuildTupleHashTableExt(PlanState *parent,
-					TupleDesc inputDesc,
-					int numCols, AttrNumber *keyColIdx,
-					const Oid *eqfuncoids,
-					FmgrInfo *hashfunctions,
-					long nbuckets, Size additionalsize,
-					MemoryContext metacxt,
-					MemoryContext tablecxt,
-					MemoryContext tempcxt, bool use_variable_hash_iv);
+					   TupleDesc inputDesc,
+					   int numCols, AttrNumber *keyColIdx,
+					   const Oid *eqfuncoids,
+					   FmgrInfo *hashfunctions,
+					   long nbuckets, Size additionalsize,
+					   MemoryContext metacxt,
+					   MemoryContext tablecxt,
+					   MemoryContext tempcxt, bool use_variable_hash_iv);
 extern TupleHashEntry LookupTupleHashEntry(TupleHashTable hashtable,
 					 TupleTableSlot *slot,
 					 bool *isnew);
@@ -206,7 +206,7 @@ extern void EvalPlanQualInit(EPQState *epqstate, EState *estate,
 extern void EvalPlanQualSetPlan(EPQState *epqstate,
 					Plan *subplan, List *auxrowmarks);
 extern TupleTableSlot *EvalPlanQualSlot(EPQState *epqstate,
-			 Relation relation, Index rti);
+				 Relation relation, Index rti);
 
 #define EvalPlanQualSetSlot(epqstate, slot)  ((epqstate)->origslot = (slot))
 extern void EvalPlanQualFetchRowMarks(EPQState *epqstate);
@@ -436,12 +436,12 @@ extern void ExecScanReScan(ScanState *node);
  */
 extern void ExecInitResultTypeTL(PlanState *planstate);
 extern void ExecInitResultSlot(PlanState *planstate,
-							   const TupleTableSlotOps *tts_ops);
+				   const TupleTableSlotOps *tts_ops);
 extern void ExecInitResultTupleSlotTL(PlanState *planstate,
-									  const TupleTableSlotOps *tts_ops);
+						  const TupleTableSlotOps *tts_ops);
 extern void ExecInitScanTupleSlot(EState *estate, ScanState *scanstate,
-								  TupleDesc tupleDesc,
-								  const TupleTableSlotOps *tts_ops);
+					  TupleDesc tupleDesc,
+					  const TupleTableSlotOps *tts_ops);
 extern TupleTableSlot *ExecInitExtraTupleSlot(EState *estate,
 					   TupleDesc tupledesc,
 					   const TupleTableSlotOps *tts_ops);
@@ -517,7 +517,7 @@ extern void ExecAssignExprContext(EState *estate, PlanState *planstate);
 extern TupleDesc ExecGetResultType(PlanState *planstate);
 extern TupleTableSlot ExecGetResultSlot(PlanState *planstate);
 extern const TupleTableSlotOps *ExecGetResultSlotOps(PlanState *planstate,
-													 bool *isfixed);
+					 bool *isfixed);
 extern void ExecAssignProjectionInfo(PlanState *planstate,
 						 TupleDesc inputDesc);
 extern void ExecConditionalAssignProjectionInfo(PlanState *planstate,

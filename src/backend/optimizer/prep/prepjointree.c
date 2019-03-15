@@ -3086,11 +3086,11 @@ typedef struct
 {
 	Relids		relids;
 	int			sublevels_up;
-} find_dependent_phvs_context;
+}			find_dependent_phvs_context;
 
 static bool
 find_dependent_phvs_walker(Node *node,
-						   find_dependent_phvs_context *context)
+						   find_dependent_phvs_context * context)
 {
 	if (node == NULL)
 		return false;
@@ -3160,11 +3160,11 @@ typedef struct
 	int			varno;
 	int			sublevels_up;
 	Relids		subrelids;
-} substitute_phv_relids_context;
+}			substitute_phv_relids_context;
 
 static bool
 substitute_phv_relids_walker(Node *node,
-							 substitute_phv_relids_context *context)
+							 substitute_phv_relids_context * context)
 {
 	if (node == NULL)
 		return false;

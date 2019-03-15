@@ -149,7 +149,7 @@ static void deparseExpr(Expr *expr, deparse_expr_cxt *context);
 static void deparseVar(Var *node, deparse_expr_cxt *context);
 static void deparseConst(Const *node, deparse_expr_cxt *context, int showtype);
 static void deparseParam(Param *node, deparse_expr_cxt *context);
-static void deparseSubscriptingRef(SubscriptingRef *node, deparse_expr_cxt *context);
+static void deparseSubscriptingRef(SubscriptingRef * node, deparse_expr_cxt *context);
 static void deparseFuncExpr(FuncExpr *node, deparse_expr_cxt *context);
 static void deparseOpExpr(OpExpr *node, deparse_expr_cxt *context);
 static void deparseOperatorName(StringInfo buf, Form_pg_operator opform);
@@ -2521,7 +2521,7 @@ deparseParam(Param *node, deparse_expr_cxt *context)
  * Deparse a container subscript expression.
  */
 static void
-deparseSubscriptingRef(SubscriptingRef *node, deparse_expr_cxt *context)
+deparseSubscriptingRef(SubscriptingRef * node, deparse_expr_cxt *context)
 {
 	StringInfo	buf = context->buf;
 	ListCell   *lowlist_item;

@@ -75,7 +75,7 @@ typedef struct core_yy_extra_type
 	/*
 	 * The keyword list to use, and the associated grammar token codes.
 	 */
-	const ScanKeywordList *keywordlist;
+	const		ScanKeywordList *keywordlist;
 	const uint16 *keyword_tokens;
 
 	/*
@@ -122,7 +122,7 @@ extern PGDLLIMPORT const uint16 ScanKeywordTokens[];
 /* Entry points in parser/scan.l */
 extern core_yyscan_t scanner_init(const char *str,
 			 core_yy_extra_type *yyext,
-			 const ScanKeywordList *keywordlist,
+			 const ScanKeywordList * keywordlist,
 			 const uint16 *keyword_tokens);
 extern void scanner_finish(core_yyscan_t yyscanner);
 extern int core_yylex(core_YYSTYPE *lvalp, YYLTYPE *llocp,

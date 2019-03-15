@@ -266,7 +266,7 @@ _equalWindowFunc(const WindowFunc *a, const WindowFunc *b)
 }
 
 static bool
-_equalSubscriptingRef(const SubscriptingRef *a, const SubscriptingRef *b)
+_equalSubscriptingRef(const SubscriptingRef * a, const SubscriptingRef * b)
 {
 	COMPARE_SCALAR_FIELD(refcontainertype);
 	COMPARE_SCALAR_FIELD(refelemtype);

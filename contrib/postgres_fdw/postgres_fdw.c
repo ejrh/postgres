@@ -3507,6 +3507,7 @@ store_returning_result(PgFdwModifyState *fmstate,
 											fmstate->retrieved_attrs,
 											NULL,
 											fmstate->temp_cxt);
+
 		/*
 		 * The returning slot will not necessarily be suitable to store
 		 * heaptuples directly, so allow for conversion.

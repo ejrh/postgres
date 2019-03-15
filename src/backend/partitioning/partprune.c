@@ -163,7 +163,7 @@ static PruneStepResult *get_matching_range_bounds(PartitionPruneContext *context
 						  FmgrInfo *partsupfunc, Bitmapset *nullkeys);
 static Bitmapset *pull_exec_paramids(Expr *expr);
 static bool pull_exec_paramids_walker(Node *node, Bitmapset **context);
-static bool analyze_partkey_exprs(PartitionedRelPruneInfo *pinfo, List *steps,
+static bool analyze_partkey_exprs(PartitionedRelPruneInfo * pinfo, List *steps,
 					  int partnatts);
 static PruneStepResult *perform_pruning_base_step(PartitionPruneContext *context,
 						  PartitionPruneStepOp *opstep);
@@ -2908,7 +2908,7 @@ pull_exec_paramids_walker(Node *node, Bitmapset **context)
  * level.  Also fills fields of *pinfo to record how to process each step.
  */
 static bool
-analyze_partkey_exprs(PartitionedRelPruneInfo *pinfo, List *steps,
+analyze_partkey_exprs(PartitionedRelPruneInfo * pinfo, List *steps,
 					  int partnatts)
 {
 	bool		doruntimeprune = false;

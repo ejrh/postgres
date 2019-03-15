@@ -137,7 +137,7 @@ static const CatalogId nilCatalogId = {0, 0};
 
 /* override for standard extra_float_digits setting */
 static bool have_extra_float_digits = false;
-static int extra_float_digits;
+static int	extra_float_digits;
 
 /*
  * The default number of rows per INSERT when
@@ -1115,13 +1115,14 @@ setup_connection(Archive *AH, const char *dumpencoding,
 		ExecuteSqlStatement(AH, "SET INTERVALSTYLE = POSTGRES");
 
 	/*
-	 * Use an explicitly specified extra_float_digits if it has been
-	 * provided. Otherwise, set extra_float_digits so that we can dump float
-	 * data exactly (given correctly implemented float I/O code, anyway).
+	 * Use an explicitly specified extra_float_digits if it has been provided.
+	 * Otherwise, set extra_float_digits so that we can dump float data
+	 * exactly (given correctly implemented float I/O code, anyway).
 	 */
 	if (have_extra_float_digits)
 	{
 		PQExpBuffer q = createPQExpBuffer();
+
 		appendPQExpBuffer(q, "SET extra_float_digits TO %d",
 						  extra_float_digits);
 		ExecuteSqlStatement(AH, q->data);
@@ -16166,7 +16167,7 @@ dumpTableSchema(Archive *fout, TableInfo *tbinfo)
 
 	if (tbinfo->dobj.dump & DUMP_COMPONENT_DEFINITION)
 	{
-		char *tableam = NULL;
+		char	   *tableam = NULL;
 
 		if (tbinfo->relkind == RELKIND_RELATION ||
 			tbinfo->relkind == RELKIND_MATVIEW)

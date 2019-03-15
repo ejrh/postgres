@@ -40,7 +40,7 @@ typedef struct JitInstrumentation
 
 	/* accumulated time for code emission */
 	instr_time	emission_counter;
-} JitInstrumentation;
+}			JitInstrumentation;
 
 /*
  * DSM structure for accumulating jit instrumentation of all workers.
@@ -49,7 +49,7 @@ typedef struct SharedJitInstrumentation
 {
 	int			num_workers;
 	JitInstrumentation jit_instr[FLEXIBLE_ARRAY_MEMBER];
-} SharedJitInstrumentation;
+}			SharedJitInstrumentation;
 
 typedef struct JitContext
 {
@@ -99,7 +99,7 @@ extern void jit_release_context(JitContext *context);
  * not be able to perform JIT (i.e. return false).
  */
 extern bool jit_compile_expr(struct ExprState *state);
-extern void InstrJitAgg(JitInstrumentation *dst, JitInstrumentation *add);
+extern void InstrJitAgg(JitInstrumentation * dst, JitInstrumentation * add);
 
 
 #endif							/* JIT_H */

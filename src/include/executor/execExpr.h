@@ -691,7 +691,7 @@ typedef struct SubscriptingRefState
 	/* if we have a nested assignment, SBSREF_OLD puts old value here */
 	Datum		prevvalue;
 	bool		prevnull;
-} SubscriptingRefState;
+}			SubscriptingRefState;
 
 
 /* functions in execExpr.c */

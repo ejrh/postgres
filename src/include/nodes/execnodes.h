@@ -430,7 +430,7 @@ typedef struct ResultRelInfo
 	Instrumentation *ri_TrigInstrument;
 
 	/* On-demand created slots for triggers / returning processing */
-	TupleTableSlot *ri_ReturningSlot; /* for trigger output tuples */
+	TupleTableSlot *ri_ReturningSlot;	/* for trigger output tuples */
 	TupleTableSlot *ri_TrigOldSlot; /* for a trigger's old tuple */
 	TupleTableSlot *ri_TrigNewSlot; /* for a trigger's new tuple */
 
@@ -970,7 +970,7 @@ typedef struct PlanState
 	/*
 	 * Other run-time state needed by most if not all node types.
 	 */
-	TupleDesc ps_ResultTupleDesc;	/* node's return type */
+	TupleDesc	ps_ResultTupleDesc; /* node's return type */
 	TupleTableSlot *ps_ResultTupleSlot; /* slot for my result tuples */
 	ExprContext *ps_ExprContext;	/* node's expression-evaluation context */
 	ProjectionInfo *ps_ProjInfo;	/* info for doing tuple projection */
@@ -1009,14 +1009,14 @@ typedef struct PlanState
 	const TupleTableSlotOps *outerops;
 	const TupleTableSlotOps *innerops;
 	const TupleTableSlotOps *resultops;
-	bool scanopsfixed;
-	bool outeropsfixed;
-	bool inneropsfixed;
-	bool resultopsfixed;
-	bool scanopsset;
-	bool outeropsset;
-	bool inneropsset;
-	bool resultopsset;
+	bool		scanopsfixed;
+	bool		outeropsfixed;
+	bool		inneropsfixed;
+	bool		resultopsfixed;
+	bool		scanopsset;
+	bool		outeropsset;
+	bool		inneropsset;
+	bool		resultopsset;
 } PlanState;
 
 /* ----------------
@@ -1104,8 +1104,8 @@ typedef struct ModifyTableState
 	PlanState **mt_plans;		/* subplans (one per target rel) */
 	int			mt_nplans;		/* number of plans in the array */
 	int			mt_whichplan;	/* which one is being executed (0..n-1) */
-	TupleTableSlot** mt_scans;	/* input tuple corresponding to underlying
-								   plans */
+	TupleTableSlot **mt_scans;	/* input tuple corresponding to underlying
+								 * plans */
 	ResultRelInfo *resultRelInfo;	/* per-subplan target relations */
 	ResultRelInfo *rootResultRelInfo;	/* root target relation (partitioned
 										 * table root) */
@@ -1309,14 +1309,14 @@ typedef struct SampleScanState
  */
 typedef struct
 {
-	struct ScanKeyData *scan_key;		/* scankey to put value into */
+	struct ScanKeyData *scan_key;	/* scankey to put value into */
 	ExprState  *key_expr;		/* expr to evaluate to get value */
 	bool		key_toastable;	/* is expr's result a toastable datatype? */
 } IndexRuntimeKeyInfo;
 
 typedef struct
 {
-	struct ScanKeyData *scan_key;		/* scankey to put value into */
+	struct ScanKeyData *scan_key;	/* scankey to put value into */
 	ExprState  *array_expr;		/* expr to evaluate to get array value */
 	int			next_elem;		/* next array element to use */
 	int			num_elems;		/* number of elems in current array value */

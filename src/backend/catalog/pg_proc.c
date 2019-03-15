@@ -421,7 +421,7 @@ ProcedureCreate(const char *procedureName,
 					 prokind == PROKIND_PROCEDURE
 					 ? errmsg("cannot change whether a procedure has output parameters")
 					 : errmsg("cannot change return type of existing function"),
-					 /* translator: first %s is DROP FUNCTION or DROP PROCEDURE */
+			/* translator: first %s is DROP FUNCTION or DROP PROCEDURE */
 					 errhint("Use %s %s first.",
 							 dropcmd,
 							 format_procedure(oldproc->oid))));
@@ -448,7 +448,7 @@ ProcedureCreate(const char *procedureName,
 						(errcode(ERRCODE_INVALID_FUNCTION_DEFINITION),
 						 errmsg("cannot change return type of existing function"),
 						 errdetail("Row type defined by OUT parameters is different."),
-						 /* translator: first %s is DROP FUNCTION or DROP PROCEDURE */
+				/* translator: first %s is DROP FUNCTION or DROP PROCEDURE */
 						 errhint("Use %s %s first.",
 								 dropcmd,
 								 format_procedure(oldproc->oid))));
@@ -493,7 +493,7 @@ ProcedureCreate(const char *procedureName,
 							(errcode(ERRCODE_INVALID_FUNCTION_DEFINITION),
 							 errmsg("cannot change name of input parameter \"%s\"",
 									old_arg_names[j]),
-							 /* translator: first %s is DROP FUNCTION or DROP PROCEDURE */
+					/* translator: first %s is DROP FUNCTION or DROP PROCEDURE */
 							 errhint("Use %s %s first.",
 									 dropcmd,
 									 format_procedure(oldproc->oid))));
@@ -519,7 +519,7 @@ ProcedureCreate(const char *procedureName,
 				ereport(ERROR,
 						(errcode(ERRCODE_INVALID_FUNCTION_DEFINITION),
 						 errmsg("cannot remove parameter defaults from existing function"),
-						 /* translator: first %s is DROP FUNCTION or DROP PROCEDURE */
+				/* translator: first %s is DROP FUNCTION or DROP PROCEDURE */
 						 errhint("Use %s %s first.",
 								 dropcmd,
 								 format_procedure(oldproc->oid))));
@@ -547,7 +547,7 @@ ProcedureCreate(const char *procedureName,
 					ereport(ERROR,
 							(errcode(ERRCODE_INVALID_FUNCTION_DEFINITION),
 							 errmsg("cannot change data type of existing parameter default value"),
-							 /* translator: first %s is DROP FUNCTION or DROP PROCEDURE */
+					/* translator: first %s is DROP FUNCTION or DROP PROCEDURE */
 							 errhint("Use %s %s first.",
 									 dropcmd,
 									 format_procedure(oldproc->oid))));
@@ -573,7 +573,7 @@ ProcedureCreate(const char *procedureName,
 	else
 	{
 		/* Creating a new procedure */
-		Oid		newOid;
+		Oid			newOid;
 
 		/* First, get default permissions and set up proacl */
 		proacl = get_user_default_acl(OBJECT_FUNCTION, proowner,

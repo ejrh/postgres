@@ -1063,16 +1063,16 @@ ecpg_store_input(const int lineno, const bool force_indicator, const struct vari
 static void
 print_param_value(char *value, int len, int is_binary, int lineno, int nth)
 {
-	char *value_s;
-	bool malloced = false;
+	char	   *value_s;
+	bool		malloced = false;
 
 	if (value == NULL)
 		value_s = "null";
-	else if (! is_binary)
+	else if (!is_binary)
 		value_s = value;
 	else
 	{
-		value_s = ecpg_alloc(ecpg_hex_enc_len(len)+1, lineno);
+		value_s = ecpg_alloc(ecpg_hex_enc_len(len) + 1, lineno);
 		if (value_s != NULL)
 		{
 			ecpg_hex_encode(value, len, value_s);
@@ -1084,7 +1084,7 @@ print_param_value(char *value, int len, int is_binary, int lineno, int nth)
 	}
 
 	ecpg_log("ecpg_free_params on line %d: parameter %d = %s\n",
-				lineno, nth, value_s);
+			 lineno, nth, value_s);
 
 	if (malloced)
 		ecpg_free(value_s);
@@ -1099,7 +1099,7 @@ ecpg_free_params(struct statement *stmt, bool print)
 	{
 		if (print)
 			print_param_value(stmt->paramvalues[n], stmt->paramlengths[n],
-								stmt->paramformats[n], stmt->lineno, n + 1);
+							  stmt->paramformats[n], stmt->lineno, n + 1);
 		ecpg_free(stmt->paramvalues[n]);
 	}
 	ecpg_free(stmt->paramvalues);
@@ -1145,13 +1145,13 @@ insert_tobeinserted(int position, int ph_len, struct statement *stmt, char *tobe
 
 static bool
 store_input_from_desc(struct statement *stmt, struct descriptor_item *desc_item,
-						char **tobeinserted)
+					  char **tobeinserted)
 {
 	struct variable var;
 
 	/*
-	 * In case of binary data, only allocate memory and memcpy because
-	 * binary data have been already stored into desc_item->data with
+	 * In case of binary data, only allocate memory and memcpy because binary
+	 * data have been already stored into desc_item->data with
 	 * ecpg_store_input() at ECPGset_desc().
 	 */
 	if (desc_item->is_binary)
@@ -2188,7 +2188,7 @@ ECPGdo(const int lineno, const int compat, const int force_indicator, const char
 {
 	va_list		args;
 	bool		ret;
-	const char  *real_connection_name = NULL;
+	const char *real_connection_name = NULL;
 
 	real_connection_name = connection_name;
 
@@ -2205,11 +2205,11 @@ ECPGdo(const int lineno, const int compat, const int force_indicator, const char
 		if (real_connection_name == NULL)
 		{
 			/*
-			 * If can't get the connection name by declared name then using connection name
-			 * coming from the parameter connection_name
+			 * If can't get the connection name by declared name then using
+			 * connection name coming from the parameter connection_name
 			 */
 			real_connection_name = connection_name;
-		 }
+		}
 	}
 
 	va_start(args, query);

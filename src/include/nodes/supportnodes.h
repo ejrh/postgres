@@ -67,7 +67,7 @@ typedef struct SupportRequestSimplify
 
 	struct PlannerInfo *root;	/* Planner's infrastructure */
 	FuncExpr   *fcall;			/* Function call to be simplified */
-} SupportRequestSimplify;
+}			SupportRequestSimplify;
 
 /*
  * The Selectivity request allows the support function to provide a
@@ -104,7 +104,7 @@ typedef struct SupportRequestSelectivity
 
 	/* Output fields: */
 	Selectivity selectivity;	/* returned selectivity estimate */
-} SupportRequestSelectivity;
+}			SupportRequestSelectivity;
 
 /*
  * The Cost request allows the support function to provide an execution
@@ -140,7 +140,7 @@ typedef struct SupportRequestCost
 	/* Output fields: */
 	Cost		startup;		/* one-time cost */
 	Cost		per_tuple;		/* per-evaluation cost */
-} SupportRequestCost;
+}			SupportRequestCost;
 
 /*
  * The Rows request allows the support function to provide an output rowcount
@@ -166,7 +166,7 @@ typedef struct SupportRequestRows
 
 	/* Output fields: */
 	double		rows;			/* number of rows expected to be returned */
-} SupportRequestRows;
+}			SupportRequestRows;
 
 /*
  * The IndexCondition request allows the support function to generate
@@ -237,6 +237,6 @@ typedef struct SupportRequestIndexCondition
 	/* Output fields: */
 	bool		lossy;			/* set to false if index condition is an exact
 								 * equivalent of the function call */
-} SupportRequestIndexCondition;
+}			SupportRequestIndexCondition;
 
 #endif							/* SUPPORTNODES_H */

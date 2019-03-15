@@ -382,9 +382,9 @@ TidNext(TidScanState *node)
 			 * Store the scanned tuple in the scan tuple slot of the scan
 			 * state, transferring the pin to the slot.
 			 */
-			ExecStorePinnedBufferHeapTuple(tuple, /* tuple to store */
+			ExecStorePinnedBufferHeapTuple(tuple,	/* tuple to store */
 										   slot,	/* slot to store in */
-										   buffer);	/* buffer associated with
+										   buffer); /* buffer associated with
 													 * tuple */
 
 			return slot;

@@ -167,8 +167,8 @@ _bt_search(Relation rel, int keysz, ScanKey scankey, bool nextkey,
 		new_stack->bts_parent = stack_in;
 
 		/*
-		 * Page level 1 is lowest non-leaf page level prior to leaves.  So,
-		 * if we're on the level 1 and asked to lock leaf page in write mode,
+		 * Page level 1 is lowest non-leaf page level prior to leaves.  So, if
+		 * we're on the level 1 and asked to lock leaf page in write mode,
 		 * then lock next page in write mode, because it must be a leaf.
 		 */
 		if (opaque->btpo.level == 1 && access == BT_WRITE)

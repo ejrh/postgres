@@ -63,7 +63,7 @@ typedef struct inline_cte_walker_context
 	int			levelsup;
 	int			refcount;		/* number of remaining references */
 	Query	   *ctequery;		/* query to substitute */
-} inline_cte_walker_context;
+}			inline_cte_walker_context;
 
 
 static Node *build_subplan(PlannerInfo *root, Plan *plan, PlannerInfo *subroot,
@@ -86,7 +86,7 @@ static bool hash_ok_operator(OpExpr *expr);
 static bool contain_dml(Node *node);
 static bool contain_dml_walker(Node *node, void *context);
 static void inline_cte(PlannerInfo *root, CommonTableExpr *cte);
-static bool inline_cte_walker(Node *node, inline_cte_walker_context *context);
+static bool inline_cte_walker(Node *node, inline_cte_walker_context * context);
 static bool simplify_EXISTS_query(PlannerInfo *root, Query *query);
 static Query *convert_EXISTS_to_ANY(PlannerInfo *root, Query *subselect,
 					  Node **testexpr, List **paramIds);
@@ -1037,7 +1037,7 @@ inline_cte(PlannerInfo *root, CommonTableExpr *cte)
 }
 
 static bool
-inline_cte_walker(Node *node, inline_cte_walker_context *context)
+inline_cte_walker(Node *node, inline_cte_walker_context * context)
 {
 	if (node == NULL)
 		return false;

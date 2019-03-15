@@ -92,7 +92,7 @@ typedef enum CopyInsertMethod
 	CIM_SINGLE,					/* use heap_insert or fdw routine */
 	CIM_MULTI,					/* always use heap_multi_insert */
 	CIM_MULTI_CONDITIONAL		/* use heap_multi_insert only if valid */
-} CopyInsertMethod;
+}			CopyInsertMethod;
 
 /*
  * This struct contains all the state variables used throughout a COPY
@@ -805,7 +805,7 @@ DoCopy(ParseState *pstate, const CopyStmt *stmt,
 	Relation	rel;
 	Oid			relid;
 	RawStmt    *query = NULL;
-	Node    *whereClause = NULL;
+	Node	   *whereClause = NULL;
 
 	/*
 	 * Disallow COPY to/from file or program except to users with the
@@ -867,7 +867,7 @@ DoCopy(ParseState *pstate, const CopyStmt *stmt,
 			/* Transform the raw expression tree */
 			whereClause = transformExpr(pstate, stmt->whereClause, EXPR_KIND_COPY_WHERE);
 
-			/*  Make sure it yields a boolean result. */
+			/* Make sure it yields a boolean result. */
 			whereClause = coerce_to_boolean(pstate, whereClause, "WHERE");
 
 			/* we have to fix its collations too */
@@ -2466,8 +2466,8 @@ CopyFrom(CopyState cstate)
 		if (cstate->rel->rd_rel->relkind == RELKIND_PARTITIONED_TABLE)
 		{
 			ereport(ERROR,
-				(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
-					errmsg("cannot perform FREEZE on a partitioned table")));
+					(errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+					 errmsg("cannot perform FREEZE on a partitioned table")));
 		}
 
 		/*
@@ -2561,7 +2561,7 @@ CopyFrom(CopyState cstate)
 
 	if (cstate->whereClause)
 		cstate->qualexpr = ExecInitQual(castNode(List, cstate->whereClause),
-												&mtstate->ps);
+										&mtstate->ps);
 
 	/*
 	 * It's more efficient to prepare a bunch of tuples for insertion, and
@@ -2752,7 +2752,7 @@ CopyFrom(CopyState cstate)
 					 */
 					if (nBufferedTuples > 0)
 					{
-						MemoryContext	oldcontext;
+						MemoryContext oldcontext;
 
 						CopyFromInsertBatch(cstate, estate, mycid, hi_options,
 											prevResultRelInfo, myslot, bistate,
@@ -2762,10 +2762,11 @@ CopyFrom(CopyState cstate)
 						bufferedTuplesSize = 0;
 
 						/*
-						 * The tuple is already allocated in the batch context, which
-						 * we want to reset.  So to keep the tuple we copy it into the
-						 * short-lived (per-tuple) context, reset the batch context
-						 * and then copy it back into the per-batch one.
+						 * The tuple is already allocated in the batch
+						 * context, which we want to reset.  So to keep the
+						 * tuple we copy it into the short-lived (per-tuple)
+						 * context, reset the batch context and then copy it
+						 * back into the per-batch one.
 						 */
 						oldcontext = MemoryContextSwitchTo(GetPerTupleMemoryContext(estate));
 						tuple = heap_copytuple(tuple);
@@ -2780,8 +2781,8 @@ CopyFrom(CopyState cstate)
 						MemoryContextSwitchTo(oldcontext);
 
 						/*
-						 * Also push the tuple copy to the slot (resetting the context
-						 * invalidated the slot contents).
+						 * Also push the tuple copy to the slot (resetting the
+						 * context invalidated the slot contents).
 						 */
 						ExecStoreHeapTuple(tuple, slot, false);
 					}

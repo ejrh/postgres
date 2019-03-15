@@ -2543,7 +2543,7 @@ IndexBuildHeapRangeScan(Relation heapRelation,
 
 		scan = table_beginscan_strat(heapRelation,	/* relation */
 									 snapshot,	/* snapshot */
-									 0,	/* number of keys */
+									 0, /* number of keys */
 									 NULL,	/* scan key */
 									 true,	/* buffer access strategy OK */
 									 allow_sync);	/* syncscan OK? */
@@ -3325,10 +3325,10 @@ validate_index_heapscan(Relation heapRelation,
 	 */
 	scan = table_beginscan_strat(heapRelation,	/* relation */
 								 snapshot,	/* snapshot */
-								 0,	/* number of keys */
+								 0, /* number of keys */
 								 NULL,	/* scan key */
 								 true,	/* buffer access strategy OK */
-								 false); /* syncscan not OK */
+								 false);	/* syncscan not OK */
 	hscan = (HeapScanDesc) scan;
 
 	/*
