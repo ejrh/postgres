@@ -245,7 +245,7 @@ statext_mcv_build(int numrows, HeapTuple *rows, Bitmapset *attrs,
 	{
 		int			j;
 		SortItem	key;
-		MultiSortSupport	tmp;
+		MultiSortSupport tmp;
 
 		/* frequencies for values in each attribute */
 		SortItem  **freqs;
@@ -447,7 +447,7 @@ build_distinct_groups(int numrows, SortItem *items, MultiSortSupport mss,
 static int
 sort_item_compare(const void *a, const void *b, void *arg)
 {
-	SortSupport	ssup = (SortSupport) arg;
+	SortSupport ssup = (SortSupport) arg;
 	SortItem   *ia = (SortItem *) a;
 	SortItem   *ib = (SortItem *) b;
 
@@ -483,7 +483,7 @@ build_column_frequencies(SortItem *groups, int ngroups,
 
 	/* allocate arrays for all columns as a single chunk */
 	ptr = palloc(MAXALIGN(sizeof(SortItem *) * mss->ndims) +
-		  mss->ndims * MAXALIGN(sizeof(SortItem) * ngroups));
+				 mss->ndims * MAXALIGN(sizeof(SortItem) * ngroups));
 
 	/* initial array of pointers */
 	result = (SortItem **) ptr;
@@ -491,7 +491,7 @@ build_column_frequencies(SortItem *groups, int ngroups,
 
 	for (dim = 0; dim < mss->ndims; dim++)
 	{
-		SortSupport	ssup = &mss->ssup[dim];
+		SortSupport ssup = &mss->ssup[dim];
 
 		/* array of values for a single column */
 		result[dim] = (SortItem *) ptr;
@@ -512,15 +512,15 @@ build_column_frequencies(SortItem *groups, int ngroups,
 
 		/*
 		 * Identify distinct values, compute frequency (there might be
-		 * multiple MCV items containing this value, so we need to sum
-		 * counts from all of them.
+		 * multiple MCV items containing this value, so we need to sum counts
+		 * from all of them.
 		 */
 		ncounts[dim] = 1;
 		for (i = 1; i < ngroups; i++)
 		{
-			if (sort_item_compare(&result[dim][i-1], &result[dim][i], ssup) == 0)
+			if (sort_item_compare(&result[dim][i - 1], &result[dim][i], ssup) == 0)
 			{
-				result[dim][ncounts[dim]-1].count += result[dim][i].count;
+				result[dim][ncounts[dim] - 1].count += result[dim][i].count;
 				continue;
 			}
 
@@ -707,23 +707,23 @@ statext_mcv_serialize(MCVList *mcvlist, VacAttrStats **stats)
 		 */
 		info[dim].nvalues = ndistinct;
 
-		if (info[dim].typbyval)	/* by-value data types */
+		if (info[dim].typbyval) /* by-value data types */
 		{
 			info[dim].nbytes = info[dim].nvalues * info[dim].typlen;
 
 			/*
 			 * We copy the data into the MCV item during deserialization, so
 			 * we don't need to allocate any extra space.
-			*/
+			 */
 			info[dim].nbytes_aligned = 0;
 		}
-		else if (info[dim].typlen > 0)		/* fixed-length by-ref */
+		else if (info[dim].typlen > 0)	/* fixed-length by-ref */
 		{
 			/*
 			 * We don't care about alignment in the serialized data, so we
 			 * pack the data as much as possible. But we also track how much
-			 * data will be needed after deserialization, and in that case
-			 * we need to account for alignment of each item.
+			 * data will be needed after deserialization, and in that case we
+			 * need to account for alignment of each item.
 			 *
 			 * Note: As the items are fixed-length, we could easily compute
 			 * this during deserialization, but we do it here anyway.
@@ -749,8 +749,8 @@ statext_mcv_serialize(MCVList *mcvlist, VacAttrStats **stats)
 
 				/* serialized length (uint32 length + data) */
 				len = VARSIZE_ANY_EXHDR(values[dim][i]);
-				info[dim].nbytes += sizeof(uint32);	/* length */
-				info[dim].nbytes += len;			/* value (no header) */
+				info[dim].nbytes += sizeof(uint32); /* length */
+				info[dim].nbytes += len;	/* value (no header) */
 
 				/*
 				 * During deserialization we'll build regular varlena values
@@ -776,8 +776,8 @@ statext_mcv_serialize(MCVList *mcvlist, VacAttrStats **stats)
 
 				/* c-strings include terminator, so +1 byte */
 				len = strlen(DatumGetCString(values[dim][i])) + 1;
-				info[dim].nbytes += sizeof(uint32);	/* length */
-				info[dim].nbytes += len;			/* value */
+				info[dim].nbytes += sizeof(uint32); /* length */
+				info[dim].nbytes += len;	/* value */
 
 				/* space needed for properly aligned deserialized copies */
 				info[dim].nbytes_aligned += MAXALIGN(len);
@@ -793,9 +793,9 @@ statext_mcv_serialize(MCVList *mcvlist, VacAttrStats **stats)
 	 * whole serialized MCV list (varlena header, MCV header, dimension info
 	 * for each attribute, deduplicated values and items).
 	 */
-	total_length = (3 * sizeof(uint32))			/* magic + type + nitems */
-					+ sizeof(AttrNumber)		/* ndimensions */
-					+ (ndims * sizeof(Oid));	/* attribute types */
+	total_length = (3 * sizeof(uint32)) /* magic + type + nitems */
+		+ sizeof(AttrNumber)	/* ndimensions */
+		+ (ndims * sizeof(Oid));	/* attribute types */
 
 	/* dimension info */
 	total_length += ndims * sizeof(DimensionInfo);
@@ -938,7 +938,8 @@ statext_mcv_serialize(MCVList *mcvlist, VacAttrStats **stats)
 											  info[dim].nvalues, sizeof(Datum),
 											  compare_scalars_simple, &ssup[dim]);
 
-				Assert(value != NULL);	/* serialization or deduplication error */
+				Assert(value != NULL);	/* serialization or deduplication
+										 * error */
 
 				/* compute index within the deduplicated array */
 				index = (uint16) (value - values[dim]);
@@ -1131,8 +1132,8 @@ statext_mcv_deserialize(bytea *data)
 	 * serialized data - it's not aligned properly, and it may disappear while
 	 * we're still using the MCV list, e.g. due to catcache release.
 	 *
-	 * We do care about alignment here, because we will allocate all the pieces
-	 * at once, but then use pointers to different parts.
+	 * We do care about alignment here, because we will allocate all the
+	 * pieces at once, but then use pointers to different parts.
 	 */
 	mcvlen = MAXALIGN(offsetof(MCVList, items) + (sizeof(MCVItem) * nitems));
 
@@ -1275,7 +1276,7 @@ statext_mcv_deserialize(bytea *data)
 		/* finally translate the indexes (for non-NULL only) */
 		for (dim = 0; dim < ndims; dim++)
 		{
-			uint16	index;
+			uint16		index;
 
 			memcpy(&index, ptr, sizeof(uint16));
 			ptr += sizeof(uint16);
@@ -1361,7 +1362,8 @@ pg_stats_ext_mcvlist_items(PG_FUNCTION_ARGS)
 	/* stuff done on every call of the function */
 	funcctx = SRF_PERCALL_SETUP();
 
-	if (funcctx->call_cntr < funcctx->max_calls)	/* do when there is more left to send */
+	if (funcctx->call_cntr < funcctx->max_calls)	/* do when there is more
+													 * left to send */
 	{
 		Datum		values[5];
 		bool		nulls[5];
@@ -1384,10 +1386,10 @@ pg_stats_ext_mcvlist_items(PG_FUNCTION_ARGS)
 		{
 
 			astate_nulls = accumArrayResult(astate_nulls,
-								  BoolGetDatum(item->isnull[i]),
-								  false,
-								  BOOLOID,
-								  CurrentMemoryContext);
+											BoolGetDatum(item->isnull[i]),
+											false,
+											BOOLOID,
+											CurrentMemoryContext);
 
 			if (!item->isnull[i])
 			{
@@ -1405,17 +1407,17 @@ pg_stats_ext_mcvlist_items(PG_FUNCTION_ARGS)
 				txt = cstring_to_text(DatumGetPointer(val));
 
 				astate_values = accumArrayResult(astate_values,
-								  PointerGetDatum(txt),
-								  false,
-								  TEXTOID,
-								  CurrentMemoryContext);
+												 PointerGetDatum(txt),
+												 false,
+												 TEXTOID,
+												 CurrentMemoryContext);
 			}
 			else
 				astate_values = accumArrayResult(astate_values,
-								  (Datum) 0,
-								  true,
-								  TEXTOID,
-								  CurrentMemoryContext);
+												 (Datum) 0,
+												 true,
+												 TEXTOID,
+												 CurrentMemoryContext);
 		}
 
 		values[0] = Int32GetDatum(funcctx->call_cntr);
