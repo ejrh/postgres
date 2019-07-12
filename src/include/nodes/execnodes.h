@@ -1593,6 +1593,7 @@ typedef struct TidRangeScanState
 	BlockNumber trss_endBlock;
 	OffsetNumber trss_startOffset;
 	OffsetNumber trss_endOffset;
+	TBMIterateResult trss_tbm;
 	bool		trss_inScan;
 } TidRangeScanState;
 

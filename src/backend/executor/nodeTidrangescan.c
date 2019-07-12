@@ -303,6 +303,12 @@ NextInTidRange(TidRangeScanState *node, TableScanDesc scandesc, ScanDirection di
 
 	for (;;)
 	{
+		while (!node->tuples_to_scan)
+			node->tuples_to_scan = table_scan_bitmap_next_block(scandesc, &node->trss_tbm);
+			node->trss_tbm.blockno++;
+		}
+
+
 		BlockNumber block;
 		OffsetNumber offset;
 
@@ -379,6 +385,7 @@ TidRangeNext(TidRangeScanState *node)
 		if (node->trss_startBlock == InvalidBlockNumber)
 			TidRangeEval(node);
 
+#if 0
 		if (scandesc == NULL)
 		{
 			scandesc = table_beginscan_strat(node->ss.ss_currentRelation,
@@ -399,6 +406,19 @@ TidRangeNext(TidRangeScanState *node)
 			blocks_to_scan = node->trss_endBlock - node->trss_startBlock + 1;
 
 		heap_setscanlimits(scandesc, node->trss_startBlock, blocks_to_scan);
+#endif
+
+		scandesc = table_beginscan_bm(currentRelation,
+									  estate->es_snapshot,
+									  0,
+									  NULL);
+		node->ss.ss_currentScanDesc = scandesc;
+
+		
+		node->trss_tbm.blockno = node->trss_startBlock;
+		node->trss_tbm.ntuples = -1;
+		node->trss_tbm.recheck = true;
+
 		node->trss_inScan = true;
 	}
 
