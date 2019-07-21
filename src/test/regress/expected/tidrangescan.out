@@ -1,7 +1,13 @@
 -- tests for tidrangescans
+SET enable_seqscan TO off;
 CREATE TABLE tidrangescan(id integer, data text);
-INSERT INTO tidrangescan SELECT i,repeat('x', 100) FROM generate_series(1,1000) AS s(i);
-DELETE FROM tidrangescan WHERE substring(ctid::text from ',(\d+)\)')::integer > 10 OR substring(ctid::text from '\((\d+),')::integer >= 10;;
+-- insert enough tuples to fill at least two pages
+INSERT INTO tidrangescan SELECT i,repeat('x', 100) FROM generate_series(1,200) AS s(i);
+-- remove all tuples after the 10th tuple on each page.  Trying to ensure
+-- we get the same layout with all CPU architectures and smaller than standard
+-- page sizes.
+DELETE FROM tidrangescan
+WHERE substring(ctid::text from ',(\d+)\)')::integer > 10 OR substring(ctid::text from '\((\d+),')::integer > 2;
 VACUUM tidrangescan;
 -- range scans with upper bound
 EXPLAIN (COSTS OFF)
@@ -70,49 +76,49 @@ SELECT ctid FROM tidrangescan WHERE ctid < '(0,0)';
 
 -- range scans with lower bound
 EXPLAIN (COSTS OFF)
-SELECT ctid FROM tidrangescan WHERE ctid > '(9,8)';
+SELECT ctid FROM tidrangescan WHERE ctid > '(2,8)';
             QUERY PLAN             
 -----------------------------------
  Tid Range Scan on tidrangescan
-   TID Cond: (ctid > '(9,8)'::tid)
+   TID Cond: (ctid > '(2,8)'::tid)
 (2 rows)
 
-SELECT ctid FROM tidrangescan WHERE ctid > '(9,8)';
+SELECT ctid FROM tidrangescan WHERE ctid > '(2,8)';
   ctid  
 --------
- (9,9)
- (9,10)
+ (2,9)
+ (2,10)
 (2 rows)
 
 EXPLAIN (COSTS OFF)
-SELECT ctid FROM tidrangescan WHERE '(9,8)' < ctid;
+SELECT ctid FROM tidrangescan WHERE '(2,8)' < ctid;
             QUERY PLAN             
 -----------------------------------
  Tid Range Scan on tidrangescan
-   TID Cond: ('(9,8)'::tid < ctid)
+   TID Cond: ('(2,8)'::tid < ctid)
 (2 rows)
 
-SELECT ctid FROM tidrangescan WHERE '(9,8)' < ctid;
+SELECT ctid FROM tidrangescan WHERE '(2,8)' < ctid;
   ctid  
 --------
- (9,9)
- (9,10)
+ (2,9)
+ (2,10)
 (2 rows)
 
 EXPLAIN (COSTS OFF)
-SELECT ctid FROM tidrangescan WHERE ctid >= '(9,8)';
+SELECT ctid FROM tidrangescan WHERE ctid >= '(2,8)';
              QUERY PLAN             
 ------------------------------------
  Tid Range Scan on tidrangescan
-   TID Cond: (ctid >= '(9,8)'::tid)
+   TID Cond: (ctid >= '(2,8)'::tid)
 (2 rows)
 
-SELECT ctid FROM tidrangescan WHERE ctid >= '(9,8)';
+SELECT ctid FROM tidrangescan WHERE ctid >= '(2,8)';
   ctid  
 --------
- (9,8)
- (9,9)
- (9,10)
+ (2,8)
+ (2,9)
+ (2,10)
 (3 rows)
 
 EXPLAIN (COSTS OFF)
@@ -130,35 +136,35 @@ SELECT ctid FROM tidrangescan WHERE ctid >= '(100,0)';
 
 -- range scans with both bounds
 EXPLAIN (COSTS OFF)
-SELECT ctid FROM tidrangescan WHERE ctid > '(4,4)' AND '(4,7)' >= ctid;
+SELECT ctid FROM tidrangescan WHERE ctid > '(1,4)' AND '(1,7)' >= ctid;
                            QUERY PLAN                           
 ----------------------------------------------------------------
  Tid Range Scan on tidrangescan
-   TID Cond: ((ctid > '(4,4)'::tid) AND ('(4,7)'::tid >= ctid))
+   TID Cond: ((ctid > '(1,4)'::tid) AND ('(1,7)'::tid >= ctid))
 (2 rows)
 
-SELECT ctid FROM tidrangescan WHERE ctid > '(4,4)' AND '(4,7)' >= ctid;
+SELECT ctid FROM tidrangescan WHERE ctid > '(1,4)' AND '(1,7)' >= ctid;
  ctid  
 -------
- (4,5)
- (4,6)
- (4,7)
+ (1,5)
+ (1,6)
+ (1,7)
 (3 rows)
 
 EXPLAIN (COSTS OFF)
-SELECT ctid FROM tidrangescan WHERE '(4,7)' >= ctid AND ctid > '(4,4)';
+SELECT ctid FROM tidrangescan WHERE '(1,7)' >= ctid AND ctid > '(1,4)';
                            QUERY PLAN                           
 ----------------------------------------------------------------
  Tid Range Scan on tidrangescan
-   TID Cond: (('(4,7)'::tid >= ctid) AND (ctid > '(4,4)'::tid))
+   TID Cond: (('(1,7)'::tid >= ctid) AND (ctid > '(1,4)'::tid))
 (2 rows)
 
-SELECT ctid FROM tidrangescan WHERE '(4,7)' >= ctid AND ctid > '(4,4)';
+SELECT ctid FROM tidrangescan WHERE '(1,7)' >= ctid AND ctid > '(1,4)';
  ctid  
 -------
- (4,5)
- (4,6)
- (4,7)
+ (1,5)
+ (1,6)
+ (1,7)
 (3 rows)
 
 -- extreme offsets
@@ -236,3 +242,4 @@ FETCH LAST c;
 COMMIT;
 DROP TABLE tidrangescan;
 DROP TABLE tidrangescan_empty;
+RESET enable_seqscan;

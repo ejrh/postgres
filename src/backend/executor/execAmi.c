@@ -536,10 +536,6 @@ ExecSupportsBackwardScan(Plan *node)
 			/* Simplify life for tablesample methods by disallowing this */
 			return false;
 
-		case T_TidRangeScan:
-			/* Keep TidRangeScan as simple as possible. */
-			return false;
-
 		case T_Gather:
 			return false;
 

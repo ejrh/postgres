@@ -1178,8 +1178,8 @@ create_tidscan_path(PlannerInfo *root, RelOptInfo *rel, List *tidquals,
  *	  the pathnode.
  */
 TidRangePath *
-create_tidrangescan_path(PlannerInfo *root, RelOptInfo *rel, List *tidrangequals,
-						 Relids required_outer)
+create_tidrangescan_path(PlannerInfo *root, RelOptInfo *rel,
+						 List *tidrangequals, Relids required_outer)
 {
 	TidRangePath *pathnode = makeNode(TidRangePath);
 

@@ -859,7 +859,6 @@ static inline void
 table_scan_setlimits(TableScanDesc scan,
 					 BlockNumber startBlk, BlockNumber numBlks)
 {
-	Assert(scan->rs_rd->rd_tableam->scan_setlimits != NULL);
 	scan->rs_rd->rd_tableam->scan_setlimits(scan, startBlk, numBlks);
 }
 

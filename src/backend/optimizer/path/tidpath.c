@@ -73,7 +73,7 @@ IsCTIDVar(Var *var, RelOptInfo *rel)
  * and nothing on the other side of the clause does.
  */
 static bool
-IsTidBinaryClause(RestrictInfo *rinfo, RelOptInfo *rel)
+IsBinaryTidClause(RestrictInfo *rinfo, RelOptInfo *rel)
 {
 	OpExpr	   *node;
 	Node	   *arg1,
@@ -86,7 +86,7 @@ IsTidBinaryClause(RestrictInfo *rinfo, RelOptInfo *rel)
 		return false;
 	node = (OpExpr *) rinfo->clause;
 
-	/* Operator must take two arguments */
+	/* OpExpr must have two arguments */
 	if (list_length(node->args) != 2)
 		return false;
 	arg1 = linitial(node->args);
@@ -129,9 +129,13 @@ IsTidBinaryClause(RestrictInfo *rinfo, RelOptInfo *rel)
 static bool
 IsTidEqualClause(RestrictInfo *rinfo, RelOptInfo *rel)
 {
-	if (!IsTidBinaryClause(rinfo, rel))
+	if (!IsBinaryTidClause(rinfo, rel))
 		return false;
-	return ((OpExpr *) rinfo->clause)->opno == TIDEqualOperator;
+
+	if (((OpExpr *) rinfo->clause)->opno == TIDEqualOperator)
+		return true;
+
+	return false;
 }
 
 /*
@@ -147,13 +151,15 @@ IsTidRangeClause(RestrictInfo *rinfo, RelOptInfo *rel)
 {
 	Oid			opno;
 
-	if (!IsTidBinaryClause(rinfo, rel))
+	if (!IsBinaryTidClause(rinfo, rel))
 		return false;
 	opno = ((OpExpr *) rinfo->clause)->opno;
-	return opno == TIDLessOperator ||
-		opno == TIDLessEqOperator ||
-		opno == TIDGreaterOperator ||
-		opno == TIDGreaterEqOperator;
+
+	if (opno == TIDLessOperator || opno == TIDLessEqOperator ||
+		opno == TIDGreaterOperator || opno == TIDGreaterEqOperator)
+		return true;
+
+	return false;
 }
 
 /*
@@ -262,7 +268,7 @@ TidQualFromRestrictInfo(RestrictInfo *rinfo, RelOptInfo *rel)
  *
  * Returns a List of CTID qual RestrictInfos for the specified rel (with
  * implicit OR semantics across the list), or NIL if there are no usable
- * conditions.
+ * equality conditions.
  *
  * This function is just concerned with handling AND/OR recursion.
  */
@@ -346,7 +352,7 @@ TidQualFromRestrictInfoList(List *rlist, RelOptInfo *rel)
  *
  * Returns a List of CTID range qual RestrictInfos for the specified rel
  * (with implicit AND semantics across the list), or NIL if there are no
- * usable conditions.
+ * usable range conditions.
  */
 static List *
 TidRangeQualFromRestrictInfoList(List *rlist, RelOptInfo *rel)
@@ -362,9 +368,7 @@ TidRangeQualFromRestrictInfoList(List *rlist, RelOptInfo *rel)
 		RestrictInfo *rinfo = lfirst_node(RestrictInfo, l);
 
 		if (IsTidRangeClause(rinfo, rel))
-		{
 			rlst = lappend(rlst, rinfo);
-		}
 	}
 
 	return rlst;
@@ -478,7 +482,8 @@ create_tidscan_paths(PlannerInfo *root, RelOptInfo *rel)
 	 * If there are range quals in the baserestrict list, generate a
 	 * TidRangePath.
 	 */
-	tidrangequals = TidRangeQualFromRestrictInfoList(rel->baserestrictinfo, rel);
+	tidrangequals = TidRangeQualFromRestrictInfoList(rel->baserestrictinfo,
+													 rel);
 
 	if (tidrangequals)
 	{

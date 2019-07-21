@@ -1273,8 +1273,8 @@ cost_tidscan(Path *path, PlannerInfo *root,
 
 /*
  * cost_tidrangescan
- *	  Determines and returns the cost of scanning a relation using a range of
- *	  TIDs.
+ *	  Determines and sets the costs of scanning a relation using a range of
+ *	  TIDs for 'path'
  *
  * 'baserel' is the relation to be scanned
  * 'tidrangequals' is the list of TID-checkable range quals
@@ -1282,7 +1282,8 @@ cost_tidscan(Path *path, PlannerInfo *root,
  */
 void
 cost_tidrangescan(Path *path, PlannerInfo *root,
-				  RelOptInfo *baserel, List *tidrangequals, ParamPathInfo *param_info)
+				  RelOptInfo *baserel, List *tidrangequals,
+				  ParamPathInfo *param_info)
 {
 	Selectivity selectivity;
 	double		pages;
@@ -1292,7 +1293,6 @@ cost_tidrangescan(Path *path, PlannerInfo *root,
 	Cost		cpu_per_tuple;
 	QualCost	tid_qual_cost;
 	double		ntuples;
-	double		nrandompages;
 	double		nseqpages;
 	double		spc_random_page_cost;
 	double		spc_seq_page_cost;
@@ -1325,7 +1325,6 @@ cost_tidrangescan(Path *path, PlannerInfo *root,
 	 */
 	ntuples = selectivity * baserel->tuples;
 	nseqpages = pages - 1.0;
-	nrandompages = 1.0;
 
 	if (!enable_tidscan)
 		startup_cost += disable_cost;
@@ -1341,8 +1340,8 @@ cost_tidrangescan(Path *path, PlannerInfo *root,
 							  &spc_random_page_cost,
 							  &spc_seq_page_cost);
 
-	/* disk costs */
-	run_cost += spc_random_page_cost * nrandompages + spc_seq_page_cost * nseqpages;
+	/* disk costs; 1 random page and the remainder as seq pages */
+	run_cost += spc_random_page_cost + spc_seq_page_cost * nseqpages;
 
 	/* Add scanning CPU costs */
 	get_restriction_qual_cost(root, baserel, param_info, &qpqual_cost);

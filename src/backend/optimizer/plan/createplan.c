@@ -127,8 +127,10 @@ static Plan *create_bitmap_subplan(PlannerInfo *root, Path *bitmapqual,
 static void bitmap_subplan_mark_shared(Plan *plan);
 static TidScan *create_tidscan_plan(PlannerInfo *root, TidPath *best_path,
 									List *tlist, List *scan_clauses);
-static TidRangeScan *create_tidrangescan_plan(PlannerInfo *root, TidRangePath *best_path,
-											  List *tlist, List *scan_clauses);
+static TidRangeScan *create_tidrangescan_plan(PlannerInfo *root,
+											  TidRangePath *best_path,
+											  List *tlist,
+											  List *scan_clauses);
 static SubqueryScan *create_subqueryscan_plan(PlannerInfo *root,
 											  SubqueryScanPath *best_path,
 											  List *tlist, List *scan_clauses);
@@ -3389,7 +3391,7 @@ create_tidrangescan_plan(PlannerInfo *root, TidRangePath *best_path,
 
 	/*
 	 * The qpqual list must contain all restrictions not enforced by the
-	 * tidrangequals list.  tidquals has AND semantics, so we can simply
+	 * tidrangequals list.  tidrangequals has AND semantics, so we can simply
 	 * remove any qual that appears in it.
 	 */
 	{
@@ -3404,8 +3406,6 @@ create_tidrangescan_plan(PlannerInfo *root, TidRangePath *best_path,
 				continue;		/* we may drop pseudoconstants here */
 			if (list_member_ptr(tidrangequals, rinfo))
 				continue;		/* simple duplicate */
-			if (is_redundant_derived_clause(rinfo, tidrangequals))
-				continue;		/* derived from same EquivalenceClass */
 			qpqual = lappend(qpqual, rinfo);
 		}
 		scan_clauses = qpqual;

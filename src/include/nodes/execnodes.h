@@ -1580,7 +1580,8 @@ typedef struct TidScanState
  *		trss_tidexprs		list of TidOpExpr structs (see nodeTidrangescan.c)
  *		trss_startBlock		first block to scan
  *		trss_endBlock		last block to scan (inclusive)
- *		trss_startOffset	first offset in first block to scan
+ *		trss_startOffset	first offset in first block to scan or InvalidBlockNumber
+ *							when the range is not set
  *		trss_endOffset		last offset in last block to scan (inclusive)
  *		trss_inScan			is a scan currently in progress?
  * ----------------

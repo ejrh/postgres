@@ -12,14 +12,6 @@
  *
  *-------------------------------------------------------------------------
  */
-/*
- * INTERFACE ROUTINES
- *
- *		ExecTidRangeScan		scans a relation using a range of tids
- *		ExecInitTidRangeScan	creates and initializes state info.
- *		ExecReScanTidRangeScan	rescans the tid relation.
- *		ExecEndTidRangeScan		releases all storage.
- */
 #include "postgres.h"
 
 #include "access/relscan.h"
@@ -45,7 +37,7 @@ typedef enum
 	TIDEXPR_LOWER_BOUND
 } TidExprType;
 
-/* one element in TidExpr's opexprs */
+/* Upper or lower range bound for scan */
 typedef struct TidOpExpr
 {
 	TidExprType exprtype;		/* type of op */
@@ -93,7 +85,7 @@ MakeTidOpExpr(OpExpr *expr, TidRangeScanState *tidstate)
 			tidopexpr->exprtype = invert ? TIDEXPR_UPPER_BOUND : TIDEXPR_LOWER_BOUND;
 			break;
 		default:
-			elog(ERROR, "could not identify CTID expression");
+			elog(ERROR, "could not identify CTID operator");
 	}
 
 	tidopexpr->exprstate = exprstate;
@@ -115,8 +107,12 @@ TidExprListCreate(TidRangeScanState *tidrangestate)
 	foreach(l, node->tidrangequals)
 	{
 		OpExpr	   *opexpr = lfirst(l);
-		TidOpExpr  *tidopexpr = MakeTidOpExpr(opexpr, tidrangestate);
+		TidOpExpr  *tidopexpr;
 
+		if (!IsA(opexpr, OpExpr))
+			elog(ERROR, "could not identify CTID expression");
+
+		tidopexpr = MakeTidOpExpr(opexpr, tidrangestate);
 		tidexprs = lappend(tidexprs, tidopexpr);
 	}
 
@@ -124,8 +120,10 @@ TidExprListCreate(TidRangeScanState *tidrangestate)
 }
 
 /*
- * Set a lower bound tid, taking into account the inclusivity of the bound.
- * Return true if the bound is valid.
+ * Set 'lowerBound' based on 'tid'.  If 'inclusive' is false then the
+ * lowerBound is incremented to the next tid value so that it becomes
+ * inclusive.  If there is no valid next tid value then we return false,
+ * otherwise we return true.
  */
 static bool
 SetTidLowerBound(ItemPointer tid, bool inclusive, ItemPointer lowerBound)
@@ -144,11 +142,12 @@ SetTidLowerBound(ItemPointer tid, bool inclusive, ItemPointer lowerBound)
 
 			/*
 			 * If the lower bound was already at or above the maximum block
-			 * number, then there is no valid range.
+			 * number, then there is no valid value for it be set to.
 			 */
 			if (block >= MaxBlockNumber)
 				return false;
 
+			/* Set the lowerBound to the first offset in the next block */
 			ItemPointerSet(lowerBound, block + 1, 1);
 		}
 		else
@@ -161,8 +160,10 @@ SetTidLowerBound(ItemPointer tid, bool inclusive, ItemPointer lowerBound)
 }
 
 /*
- * Set an upper bound tid, taking into account the inclusivity of the bound.
- * Return true if the bound is valid.
+ * Set 'upperBound' based on 'tid'.  If 'inclusive' is false then the
+ * upperBound is decremented to the previous tid value so that it becomes
+ * inclusive.  If there is no valid previous tid value then we return false,
+ * otherwise we return true.
  */
 static bool
 SetTidUpperBound(ItemPointer tid, bool inclusive, ItemPointer upperBound)
@@ -189,7 +190,7 @@ SetTidUpperBound(ItemPointer tid, bool inclusive, ItemPointer upperBound)
 
 			/*
 			 * If the upper bound was already in block 0, then there is no
-			 * valid range.
+			 * valid value for it to be set to.
 			 */
 			if (block == 0)
 				return false;
@@ -206,8 +207,9 @@ SetTidUpperBound(ItemPointer tid, bool inclusive, ItemPointer upperBound)
 /* ----------------------------------------------------------------
  *		TidRangeEval
  *
- *		Compute the range of TIDs to scan, by evaluating the
- *		expressions for them.
+ *		Compute and set node's block and offset range to scan by evaluating
+ *		the trss_tidexprs.  If we detect an invalid range that cannot yield
+ *		any rows, the range is left unset.
  * ----------------------------------------------------------------
  */
 static void
@@ -226,7 +228,6 @@ TidRangeEval(TidRangeScanState *node)
 	 * visit.)
 	 */
 	nblocks = RelationGetNumberOfBlocks(node->ss.ss_currentRelation);
-
 
 	/* The biggest range on an empty table is empty; just skip it. */
 	if (nblocks == 0)
@@ -256,6 +257,10 @@ TidRangeEval(TidRangeScanState *node)
 		{
 			ItemPointerData lb;
 
+			/*
+			 * If the lower bound is beyond the maximum value for ctid, then
+			 * just bail without setting the range.  No rows can match.
+			 */
 			if (!SetTidLowerBound(itemptr, tidopexpr->inclusive, &lb))
 				return;
 
@@ -267,6 +272,10 @@ TidRangeEval(TidRangeScanState *node)
 		{
 			ItemPointerData ub;
 
+			/*
+			 * If the upper bound is below the minimum value for ctid, then
+			 * just bail without setting the range.  No rows can match.
+			 */
 			if (!SetTidUpperBound(itemptr, tidopexpr->inclusive, &ub))
 				return;
 
@@ -275,7 +284,7 @@ TidRangeEval(TidRangeScanState *node)
 		}
 	}
 
-	/* If the resulting range is not empty, use it. */
+	/* If the resulting range is not empty, set it. */
 	if (ItemPointerCompare(&lowerBound, &upperBound) <= 0)
 	{
 		node->trss_startBlock = ItemPointerGetBlockNumberNoCheck(&lowerBound);
@@ -290,7 +299,7 @@ TidRangeEval(TidRangeScanState *node)
  *
  *		Fetch the next tuple when scanning a range of TIDs.
  *
- *		Since the heap access method may return tuples that are in the scan
+ *		Since the table access method may return tuples that are in the scan
  *		limit, but not within the required TID range, this function will
  *		check for such tuples and skip over them.
  * ----------------------------------------------------------------
@@ -399,7 +408,7 @@ TidRangeNext(TidRangeScanState *node)
 	foundTuple = NextInTidRange(node, scandesc, slot);
 
 	/*
-	 * If we've exhuasted all the tuples in the range, reset the inScan flag.
+	 * If we've exhausted all the tuples in the range, reset the inScan flag.
 	 * This will cause the heap to be rescanned for any subsequent fetches,
 	 * which is important for some cursor operations: for instance, FETCH LAST
 	 * fetches all the tuples in order and then fetches one tuple in reverse.
@@ -460,8 +469,7 @@ ExecReScanTidRangeScan(TidRangeScanState *node)
 	TableScanDesc scan = node->ss.ss_currentScanDesc;
 
 	if (scan != NULL)
-		table_rescan(scan,		/* scan desc */
-					 NULL);		/* new scan keys */
+		table_rescan(scan, NULL);
 
 	/* mark scan as not in progress, and tid range list as not computed yet */
 	node->trss_inScan = false;
@@ -482,6 +490,9 @@ ExecEndTidRangeScan(TidRangeScanState *node)
 {
 	TableScanDesc scan = node->ss.ss_currentScanDesc;
 
+	if (scan != NULL)
+		table_endscan(scan);
+
 	/*
 	 * Free the exprcontext
 	 */
@@ -493,10 +504,6 @@ ExecEndTidRangeScan(TidRangeScanState *node)
 	if (node->ss.ps.ps_ResultTupleSlot)
 		ExecClearTuple(node->ss.ps.ps_ResultTupleSlot);
 	ExecClearTuple(node->ss.ss_ScanTupleSlot);
-
-	/* close heap scan */
-	if (scan != NULL)
-		table_endscan(scan);
 }
 
 /* ----------------------------------------------------------------
@@ -532,7 +539,7 @@ ExecInitTidRangeScan(TidRangeScan *node, EState *estate, int eflags)
 	ExecAssignExprContext(estate, &tidrangestate->ss.ps);
 
 	/*
-	 * mark scan as not in progress, and tid range list as not computed yet
+	 * mark scan as not in progress, and tid range as not computed yet
 	 */
 	tidrangestate->trss_inScan = false;
 	tidrangestate->trss_startBlock = InvalidBlockNumber;
@@ -543,7 +550,7 @@ ExecInitTidRangeScan(TidRangeScan *node, EState *estate, int eflags)
 	currentRelation = ExecOpenScanRelation(estate, node->scan.scanrelid, eflags);
 
 	tidrangestate->ss.ss_currentRelation = currentRelation;
-	tidrangestate->ss.ss_currentScanDesc = NULL;	/* no heap scan here */
+	tidrangestate->ss.ss_currentScanDesc = NULL;	/* no table scan here */
 
 	/*
 	 * get the scan type from the relation descriptor.
