@@ -103,6 +103,9 @@ GetTableAmRoutine(Oid amhandler)
 	Assert(routine->scan_sample_next_block != NULL);
 	Assert(routine->scan_sample_next_tuple != NULL);
 
+	Assert((routine->scan_settidrange == NULL) ==
+		   (routine->scan_getnexttidrangeslot == NULL));
+
 	return routine;
 }
 

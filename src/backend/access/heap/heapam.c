@@ -296,6 +296,8 @@ initscan(HeapScanDesc scan, ScanKey key, bool keep_startblock)
 	}
 
 	scan->rs_numblocks = InvalidBlockNumber;
+	ItemPointerSetInvalid(&scan->rs_startTid);
+	ItemPointerSetInvalid(&scan->rs_endTid);
 	scan->rs_inited = false;
 	scan->rs_ctup.t_data = NULL;
 	ItemPointerSetInvalid(&scan->rs_ctup.t_self);
@@ -806,7 +808,6 @@ heapgettup_pagemode(HeapScanDesc scan,
 	HeapTuple	tuple = &(scan->rs_ctup);
 	bool		backward = ScanDirectionIsBackward(dir);
 	BlockNumber page;
-	bool		finished;
 	Page		dp;
 	int			lines;
 	int			lineindex;
@@ -962,6 +963,8 @@ heapgettup_pagemode(HeapScanDesc scan,
 	 */
 	for (;;)
 	{
+		bool		finished;
+		
 		while (linesleft > 0)
 		{
 			lineoff = scan->rs_vistuples[lineindex];
@@ -1204,6 +1207,37 @@ heap_beginscan(Relation relation, Snapshot snapshot,
 	return (TableScanDesc) scan;
 }
 
+/*
+ * heap_settidrange - restrict range of a heapscan in terms of CTIDs
+ *
+ * startTid is the first CTID to scan
+ * endTid is the end CTID to scan (inclusive)
+ */
+void
+heap_settidrange(TableScanDesc sscan, ItemPointer startTid, ItemPointer endTid)
+{
+	HeapScanDesc	scan = (HeapScanDesc) sscan;
+	BlockNumber		start_block = ItemPointerGetBlockNumberNoCheck(startTid);
+	BlockNumber		end_block = ItemPointerGetBlockNumberNoCheck(endTid);
+
+	Assert(!scan->rs_inited);	/* else too late to change */
+	/* else rs_startblock is significant */
+	Assert(!(scan->rs_base.rs_flags & SO_ALLOW_SYNC));
+	Assert(sscan->rs_flags & SO_TYPE_TIDRANGESCAN);
+
+	ItemPointerCopy(startTid, &scan->rs_startTid);
+	ItemPointerCopy(endTid, &scan->rs_endTid);
+
+	scan->rs_startblock = start_block;
+	scan->rs_numblocks = end_block - start_block + 1;
+
+	printf("settidrange: start=(%u,%u) end=(%u,%u) startblock=%d numblocks=%d\n",
+		start_block, ItemPointerGetOffsetNumberNoCheck(startTid),
+		end_block, ItemPointerGetOffsetNumberNoCheck(endTid),
+		scan->rs_startblock, scan->rs_numblocks
+	);
+}
+
 void
 heap_rescan(TableScanDesc sscan, ScanKey key, bool set_params,
 			bool allow_strat, bool allow_sync, bool allow_pagemode)
@@ -1377,6 +1411,43 @@ heap_getnextslot(TableScanDesc sscan, ScanDirection direction, TupleTableSlot *s
 	ExecStoreBufferHeapTuple(&scan->rs_ctup, slot,
 							 scan->rs_cbuf);
 	return true;
+}
+
+bool
+heap_getnexttidrangeslot(TableScanDesc sscan, ScanDirection direction, TupleTableSlot *slot)
+{
+	HeapScanDesc scan = (HeapScanDesc) sscan;
+
+	for (;;)
+	{
+		BlockNumber block;
+		OffsetNumber offset;
+
+		if (!heap_getnextslot(sscan, direction, slot))
+			return false;
+
+		/*
+		 * If the tuple is in the first block of the range and before the
+		 * first requested offset, then we can skip it.
+		 */
+		if (ItemPointerCompare(&slot->tts_tid, &scan->rs_startTid) < 0)
+		{
+			ExecClearTuple(slot);
+			continue;
+		}
+
+		/*
+		 * Similarly, if the tuple is in the last block and after the last
+		 * requested offset, we can end the scan.
+		 */
+		if (ItemPointerCompare(&slot->tts_tid, &scan->rs_endTid) > 0)
+		{
+			ExecClearTuple(slot);
+			return false;
+		}
+
+		return true;
+	}
 }
 
 /*

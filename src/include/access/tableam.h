@@ -47,18 +47,19 @@ typedef enum ScanOptions
 	SO_TYPE_SEQSCAN = 1 << 0,
 	SO_TYPE_BITMAPSCAN = 1 << 1,
 	SO_TYPE_SAMPLESCAN = 1 << 2,
-	SO_TYPE_ANALYZE = 1 << 3,
+	SO_TYPE_TIDRANGESCAN = 1 << 3,
+	SO_TYPE_ANALYZE = 1 << 4,
 
 	/* several of SO_ALLOW_* may be specified */
 	/* allow or disallow use of access strategy */
-	SO_ALLOW_STRAT = 1 << 4,
+	SO_ALLOW_STRAT = 1 << 5,
 	/* report location to syncscan logic? */
-	SO_ALLOW_SYNC = 1 << 5,
+	SO_ALLOW_SYNC = 1 << 6,
 	/* verify visibility page-at-a-time? */
-	SO_ALLOW_PAGEMODE = 1 << 6,
+	SO_ALLOW_PAGEMODE = 1 << 7,
 
 	/* unregister snapshot at scan end? */
-	SO_TEMP_SNAPSHOT = 1 << 7
+	SO_TEMP_SNAPSHOT = 1 << 8
 } ScanOptions;
 
 /*
@@ -217,13 +218,13 @@ typedef struct TableAmRoutine
 								bool allow_sync, bool allow_pagemode);
 
 	/*
-	 * Set the range of a scan.
+	 * Set the range of TIDs to scan.
 	 *
 	 * Optional callback: A table AM can implement this to enable TID range
 	 * scans.
 	 */
-	void		(*scan_setlimits) (TableScanDesc scan,
-								   BlockNumber startBlk, BlockNumber numBlks);
+	void		(*scan_settidrange) (TableScanDesc scan,
+									 ItemPointer startTid, ItemPointer endTid);
 
 	/*
 	 * Return next tuple from `scan`, store in slot.
@@ -231,6 +232,13 @@ typedef struct TableAmRoutine
 	bool		(*scan_getnextslot) (TableScanDesc scan,
 									 ScanDirection direction,
 									 TupleTableSlot *slot);
+
+	/*
+	 * Return next tuple from `scan` in the tid range, store in slot.
+	 */
+	bool		(*scan_getnexttidrangeslot) (TableScanDesc scan,
+											 ScanDirection direction,
+											 TupleTableSlot *slot);
 
 
 	/* ------------------------------------------------------------------------
@@ -821,6 +829,18 @@ table_beginscan_sampling(Relation rel, Snapshot snapshot,
 }
 
 /*
+ * table_beginscan_tidrange
+ * TODO
+ */
+static inline TableScanDesc
+table_beginscan_tidrange(Relation rel, Snapshot snapshot)
+{
+	uint32		flags = SO_TYPE_TIDRANGESCAN;
+
+	return rel->rd_tableam->scan_begin(rel, snapshot, 0, NULL, NULL, flags);
+}
+
+/*
  * table_beginscan_analyze is an alternative entry point for setting up a
  * TableScanDesc for an ANALYZE scan.  As with bitmap scans, it's worth using
  * the same data structure although the behavior is rather different.
@@ -853,13 +873,13 @@ table_rescan(TableScanDesc scan,
 }
 
 /*
- * Set the range of a scan.
+ * Set the range of TIDs to scan
  */
 static inline void
-table_scan_setlimits(TableScanDesc scan,
-					 BlockNumber startBlk, BlockNumber numBlks)
+table_scan_settidrange(TableScanDesc scan,
+					   ItemPointer startTid, ItemPointer endTid)
 {
-	scan->rs_rd->rd_tableam->scan_setlimits(scan, startBlk, numBlks);
+	scan->rs_rd->rd_tableam->scan_settidrange(scan, startTid, endTid);
 }
 
 /*
@@ -892,6 +912,16 @@ table_scan_getnextslot(TableScanDesc sscan, ScanDirection direction, TupleTableS
 {
 	slot->tts_tableOid = RelationGetRelid(sscan->rs_rd);
 	return sscan->rs_rd->rd_tableam->scan_getnextslot(sscan, direction, slot);
+}
+
+/*
+ * Return next tuple from `scan` that's within the set rid range, store in slot.
+ */
+static inline bool
+table_scan_getnexttidrangeslot(TableScanDesc sscan, ScanDirection direction, TupleTableSlot *slot)
+{
+	slot->tts_tableOid = RelationGetRelid(sscan->rs_rd);
+	return sscan->rs_rd->rd_tableam->scan_getnexttidrangeslot(sscan, direction, slot);
 }
 
 

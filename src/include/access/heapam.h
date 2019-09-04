@@ -53,6 +53,10 @@ typedef struct HeapScanDescData
 	BlockNumber rs_numblocks;	/* max number of blocks to scan */
 	/* rs_numblocks is usually InvalidBlockNumber, meaning "scan whole rel" */
 
+	/* tid range - set by heap_settidrange */
+	ItemPointerData	rs_startTid;
+	ItemPointerData	rs_endTid;
+
 	/* scan current state */
 	bool		rs_inited;		/* false = scan not init'd yet */
 	BlockNumber rs_cblock;		/* current block # in scan, if any */
@@ -114,12 +118,15 @@ extern TableScanDesc heap_beginscan(Relation relation, Snapshot snapshot,
 extern void heap_setscanlimits(TableScanDesc scan, BlockNumber startBlk,
 							   BlockNumber numBlks);
 extern void heapgetpage(TableScanDesc scan, BlockNumber page);
+extern void heap_settidrange(TableScanDesc sscan, ItemPointer startTid, ItemPointer endTid);
 extern void heap_rescan(TableScanDesc scan, ScanKey key, bool set_params,
 						bool allow_strat, bool allow_sync, bool allow_pagemode);
 extern void heap_endscan(TableScanDesc scan);
 extern HeapTuple heap_getnext(TableScanDesc scan, ScanDirection direction);
 extern bool heap_getnextslot(TableScanDesc sscan,
 							 ScanDirection direction, struct TupleTableSlot *slot);
+extern bool heap_getnexttidrangeslot(TableScanDesc sscan,
+									 ScanDirection direction, struct TupleTableSlot *slot);
 
 extern bool heap_fetch(Relation relation, Snapshot snapshot,
 					   HeapTuple tuple, Buffer *userbuf);

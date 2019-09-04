@@ -707,7 +707,7 @@ typedef struct RelOptInfo
 	List	   *joininfo;		/* RestrictInfo structures for join clauses
 								 * involving this rel */
 	bool		has_eclass_joins;	/* T means joininfo is incomplete */
-	bool		has_scan_setlimits; /* Rel's table AM has scan_setlimits */
+	bool		has_scan_settidrange; /* Rel's table AM has scan_settidrange */
 
 	/* used by partitionwise joins: */
 	bool		consider_partitionwise_join;	/* consider partitionwise join

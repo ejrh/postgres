@@ -455,8 +455,8 @@ get_relation_info(PlannerInfo *root, Oid relationObjectId, bool inhparent,
 	get_relation_foreign_keys(root, rel, relation, inhparent);
 
 	/* Collect info about functions implemented by the rel's table AM. */
-	rel->has_scan_setlimits = relation->rd_tableam &&
-							  relation->rd_tableam->scan_setlimits != NULL;
+	rel->has_scan_settidrange = relation->rd_tableam &&
+							  relation->rd_tableam->scan_settidrange != NULL;
 
 	/*
 	 * Collect info about relation's partitioning scheme, if any. Only

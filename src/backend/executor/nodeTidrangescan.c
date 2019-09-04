@@ -295,60 +295,6 @@ TidRangeEval(TidRangeScanState *node)
 }
 
 /* ----------------------------------------------------------------
- *		NextInTidRange
- *
- *		Fetch the next tuple when scanning a range of TIDs.
- *
- *		Since the table access method may return tuples that are in the scan
- *		limit, but not within the required TID range, this function will
- *		check for such tuples and skip over them.
- * ----------------------------------------------------------------
- */
-static bool
-NextInTidRange(TidRangeScanState *node, TableScanDesc scandesc,
-			   TupleTableSlot *slot)
-{
-	for (;;)
-	{
-		BlockNumber block;
-		OffsetNumber offset;
-
-		if (!table_scan_getnextslot(scandesc, ForwardScanDirection, slot))
-			return false;
-
-		/* Check that the tuple is within the required range. */
-		block = ItemPointerGetBlockNumber(&slot->tts_tid);
-		offset = ItemPointerGetOffsetNumber(&slot->tts_tid);
-
-		/* The tuple should never come from outside the scan limits. */
-		Assert(block >= node->trss_startBlock &&
-			   block <= node->trss_endBlock);
-
-		/*
-		 * If the tuple is in the first block of the range and before the
-		 * first requested offset, then we can skip it.
-		 */
-		if (block == node->trss_startBlock && offset < node->trss_startOffset)
-		{
-			ExecClearTuple(slot);
-			continue;
-		}
-
-		/*
-		 * Similarly, if the tuple is in the last block and after the last
-		 * requested offset, we can end the scan.
-		 */
-		if (block == node->trss_endBlock && offset > node->trss_endOffset)
-		{
-			ExecClearTuple(slot);
-			return false;
-		}
-
-		return true;
-	}
-}
-
-/* ----------------------------------------------------------------
  *		TidRangeNext
  *
  *		Retrieve a tuple from the TidRangeScan node's currentRelation
@@ -375,37 +321,33 @@ TidRangeNext(TidRangeScanState *node)
 
 	if (!node->trss_inScan)
 	{
-		BlockNumber blocks_to_scan;
+		// BlockNumber blocks_to_scan;
+		ItemPointerData startTid;
+		ItemPointerData endTid;
 
 		/* First time through, compute the list of TID ranges to be visited */
 		if (node->trss_startBlock == InvalidBlockNumber)
 			TidRangeEval(node);
 
+		/* If the range is empty, don't even bother starting a scan. */
+		if (node->trss_startBlock == InvalidBlockNumber)
+			return false;
+
 		if (scandesc == NULL)
 		{
-			scandesc = table_beginscan_strat(node->ss.ss_currentRelation,
-											 estate->es_snapshot,
-											 0, NULL,
-											 false, false);
+			scandesc = table_beginscan_tidrange(node->ss.ss_currentRelation,
+												estate->es_snapshot);
 			node->ss.ss_currentScanDesc = scandesc;
 		}
 
-		/* Compute the number of blocks to scan and set the scan limits. */
-		if (node->trss_startBlock == InvalidBlockNumber)
-		{
-			/* If the range is empty, set the scan limits to zero blocks. */
-			node->trss_startBlock = 0;
-			blocks_to_scan = 0;
-		}
-		else
-			blocks_to_scan = node->trss_endBlock - node->trss_startBlock + 1;
-
-		table_scan_setlimits(scandesc, node->trss_startBlock, blocks_to_scan);
+		ItemPointerSet(&startTid, node->trss_startBlock, node->trss_startOffset);
+		ItemPointerSet(&endTid, node->trss_endBlock, node->trss_endOffset);
+		table_scan_settidrange(scandesc, &startTid, &endTid);
 		node->trss_inScan = true;
 	}
 
 	/* Fetch the next tuple. */
-	foundTuple = NextInTidRange(node, scandesc, slot);
+	foundTuple = table_scan_getnexttidrangeslot(scandesc, ForwardScanDirection, slot);
 
 	/*
 	 * If we've exhausted all the tuples in the range, reset the inScan flag.

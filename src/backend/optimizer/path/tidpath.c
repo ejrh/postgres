@@ -360,7 +360,7 @@ TidRangeQualFromRestrictInfoList(List *rlist, RelOptInfo *rel)
 	List	   *rlst = NIL;
 	ListCell   *l;
 
-	if (!rel->has_scan_setlimits)
+	if (!rel->has_scan_settidrange)
 		return NIL;
 
 	foreach(l, rlist)
